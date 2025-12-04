@@ -32,9 +32,11 @@ steps:
       - '--region'
       - 'us-central1'
       - '--allow-unauthenticated'
+      - '--add-cloudsql-instances'
+      - 'crm-gtech-sys:us-central1:gtech-crm-db'
       - '--set-env-vars'
-      - 'DATABASE_URL=$$DATABASE_URL,JWT_SECRET=$$JWT_SECRET'
-    secretEnv: ['DATABASE_URL', 'JWT_SECRET']
+      - 'DATABASE_URL=postgresql://postgres:gtech2026@localhost/postgres?host=/cloudsql/crm-gtech-sys:us-central1:gtech-crm-db,JWT_SECRET=$$JWT_SECRET'
+    secretEnv: ['JWT_SECRET']
     id: Deploy-Backend
 
   # 6. Deploy Frontend to Cloud Run (linked to Backend)
@@ -59,8 +61,6 @@ steps:
 
 availableSecrets:
   secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/DATABASE_URL/versions/latest
-    env: 'DATABASE_URL'
   - versionName: projects/$PROJECT_ID/secrets/JWT_SECRET/versions/latest
     env: 'JWT_SECRET'
 
