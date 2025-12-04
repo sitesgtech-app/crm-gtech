@@ -19,6 +19,9 @@ router.use(authenticateToken);
 // User Routes
 import * as userController from './controllers/userController';
 router.get('/users', userController.getUsers);
+router.post('/users', userController.createUser);
+router.put('/users/:id', userController.updateUser);
+router.delete('/users/:id', userController.deleteUser);
 
 // Client Routes
 router.get('/clients', clientController.getClients);

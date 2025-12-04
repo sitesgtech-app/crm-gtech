@@ -19,6 +19,8 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
     const [regName, setRegName] = useState('');
     const [regEmail, setRegEmail] = useState('');
     const [regPassword, setRegPassword] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [companyPassword, setCompanyPassword] = useState('');
 
     // Forgot Password State
     const [forgotEmail, setForgotEmail] = useState('');
@@ -72,7 +74,9 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                 email: regEmail,
                 password: regPassword,
                 name: regName,
-                role: 'VIEWER' // Default to VIEWER
+                role: 'VIEWER', // Default to VIEWER
+                companyName,
+                companyPassword
             });
 
             const { user, token } = response.data;
@@ -215,6 +219,28 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                 {/* STEP 2: REGISTER */}
                 {step === 'register' && (
                     <form onSubmit={handleRegisterSubmit} className="space-y-5 animate-fade-in">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Nombre de la Empresa</label>
+                            <input
+                                type="text"
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-white placeholder-slate-500 outline-none transition-all"
+                                placeholder="gtech"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Contraseña de la Empresa</label>
+                            <input
+                                type="password"
+                                value={companyPassword}
+                                onChange={(e) => setCompanyPassword(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-white placeholder-slate-500 outline-none transition-all"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Nombre Completo</label>
                             <input

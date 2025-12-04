@@ -24,6 +24,9 @@ async function main() {
                 password: hashedPassword,
                 name,
                 role,
+                phone: '5555-0000',
+                active: true,
+                company: 'gtech'
             },
         });
         console.log(`User created/updated: ${user.email}`);

@@ -9,6 +9,8 @@ const registerSchema = z.object({
     password: z.string().min(6),
     name: z.string(),
     role: z.enum(['ADMIN', 'SALES', 'SUPPORT', 'VIEWER']).optional(),
+    companyName: z.string(),
+    companyPassword: z.string()
 });
 
 const loginSchema = z.object({
@@ -18,7 +20,12 @@ const loginSchema = z.object({
 
 export const register = async (req: Request, res: Response) => {
     try {
-        const { email, password, name, role } = registerSchema.parse(req.body);
+        const { email, password, name, role, companyName, companyPassword } = registerSchema.parse(req.body);
+
+        // Company Validation
+        if (companyName.toLowerCase() !== 'gtech' || companyPassword !== 'gtech2026') {
+            return res.status(403).json({ error: 'Credenciales de empresa inválidas. No está autorizado para registrarse.' });
+        }
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -33,6 +40,7 @@ export const register = async (req: Request, res: Response) => {
                 password: hashedPassword,
                 name,
                 role: role || 'VIEWER',
+                company: companyName
             },
         });
 
