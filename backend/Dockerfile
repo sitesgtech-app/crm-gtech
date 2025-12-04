@@ -13,6 +13,9 @@ COPY . .
 RUN npm run build
 RUN npx prisma generate
 
+COPY startup.sh .
+RUN chmod +x startup.sh
+
 EXPOSE 8080
 
-CMD ["npm", "start"]
+CMD ["./startup.sh"]
