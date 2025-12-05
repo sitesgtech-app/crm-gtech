@@ -14,8 +14,9 @@ echo "Applying database schema (db push)..."
 ./node_modules/.bin/prisma db push --accept-data-loss
 
 if [ $? -ne 0 ]; then
-    echo "ERROR: Prisma db push failed!"
-    exit 1
+    echo "ERROR: Prisma db push failed! Check DATABASE_URL and connection."
+    echo "Continuing startup to allow log inspection..."
+    # Do not exit, so the container starts and we can see the logs
 fi
 
 echo "Seeding admin user..."
