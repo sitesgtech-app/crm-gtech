@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
-COPY prisma/schema.postgres.prisma ./prisma/schema.prisma
+COPY prisma/schema.prisma ./prisma/schema.prisma
 
 RUN npm install
 
