@@ -1,7 +1,7 @@
 FROM node:20-alpine
 
-# Install OpenSSL (required for Prisma) and build tools for bcrypt
-RUN apk -U add openssl python3 make g++
+# Install OpenSSL (required for Prisma on Alpine)
+RUN apk -U add openssl
 
 WORKDIR /app
 
