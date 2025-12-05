@@ -61,9 +61,18 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
             }
             onLoginSuccess(userWithToken);
         } catch (error: any) {
-            const msg = error.response?.data?.error || "Credenciales incorrectas o error en el servidor.";
+            console.error('Login Error:', error);
+            let msg = "Error desconocido.";
+            if (error.response) {
+                // Server responded with a status code other than 2xx
+                msg = `Error ${error.response.status}: ${error.response.data?.error || error.response.statusText}`;
+            } else if (error.request) {
+                // Request made but no response
+                msg = "No hay respuesta del servidor. Verifica tu conexión.";
+            } else {
+                msg = error.message;
+            }
             alert(msg);
-            console.error(error);
         }
     };
 

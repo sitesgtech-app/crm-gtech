@@ -16,6 +16,7 @@ server {
     location /api/ {
         proxy_pass ${BACKEND_URL};
         proxy_http_version 1.1;
+        proxy_ssl_server_name on; # Critical for Cloud Run HTTPS
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
