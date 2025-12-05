@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Mail, Lock, UserPlus, LogIn, CheckSquare, ShieldCheck, ArrowRight } from 'lucide-react';
 import api from '../services/api';
-import { User } from '../types';
-import { CheckSquare, ShieldCheck, ArrowRight, Lock, Mail, UserPlus, LogIn } from 'lucide-react';
 
 interface LoginProps {
-    onLoginSuccess: (user: User) => void;
+    onLoginSuccess: (user: any) => void;
 }
 
-export const Login = ({ onLoginSuccess }: LoginProps) => {
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const [step, setStep] = useState<'login' | 'register' | 'forgot_password' | 'reset_password'>('login');
 
     // Login State
@@ -379,9 +378,11 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                 )}
 
                 <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-500">
-                    <p>Sistema Seguro v1.0.25</p>
+                    <p>Sistema Seguro v1.1.0 (PROD)</p>
                 </div>
             </div>
         </div>
     );
 };
+
+export default Login;
