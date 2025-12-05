@@ -4,7 +4,8 @@
   "description": "Backend for GTECH CRM",
   "main": "dist/index.js",
   "scripts": {
-    "start": "npx prisma db push && node dist/create-admin.js && node dist/index.js",
+    "start": "node dist/index.js",
+    "start:prod": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "prisma:generate": "prisma generate",
