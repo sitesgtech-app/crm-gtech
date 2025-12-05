@@ -36,7 +36,7 @@ import api from './services/api';
 import { User, UserRole } from './types';
 import { Target, Eye, X, Rocket, CheckSquare, Square, ShieldCheck, ArrowRight, Lock } from 'lucide-react';
 
-import { Login } from './pages/Login';
+import Login from './pages/Login';
 
 // --- WELCOME MODAL COMPONENT ---
 const WelcomeModal = ({ onClose }: { onClose: () => void }) => {

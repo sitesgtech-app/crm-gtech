@@ -17,6 +17,7 @@ RUN npx prisma generate
 RUN npm run build
 
 COPY startup.sh .
+RUN sed -i 's/\r$//' startup.sh
 RUN chmod +x startup.sh
 
 EXPOSE 8080
