@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, Search, AlertCircle, X, Calendar, MessageCircle, Phone, Mail, MapPin, Clock, Save, UserCircle, Check, Building, ArrowRightLeft, FileText, DollarSign, Calculator, Package, Briefcase, Trash2, Edit, Upload, FileCheck, Paperclip, Eye, Receipt, TrendingUp, PieChart } from 'lucide-react';
 import { db } from '../services/db';
+import api from '../services/api';
 import { User, Opportunity, OpportunityStage, Activity, Client, Quotation } from '../types';
 import { QuotationGenerator } from '../components/QuotationGenerator';
 
@@ -67,10 +68,16 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         status: 'active'
     });
 
-    const refreshData = () => {
+    const refreshData = async () => {
         setOpportunities(db.getOpportunities(user.id, user.role));
         setClients(db.getClients(user.id, user.role));
-        setUsers(db.getUsers());
+        try {
+            const res = await api.get('/users');
+            setUsers(res.data);
+        } catch (e) {
+            console.error("Failed to fetch users from API", e);
+            setUsers(db.getUsers());
+        }
     };
 
     useEffect(() => {
