@@ -15,7 +15,7 @@ export interface User {
   theme?: string; // 'blue' | 'green' | 'purple' | 'dark' | 'red'
   active: boolean; // Determines if user can login
   permissions?: string[]; // List of allowed paths/modules for non-admins
-  
+
   // Security Fields
   mustChangePassword?: boolean; // Forces password change on next login
   verificationCode?: string; // Temporary code for email validation
@@ -136,7 +136,7 @@ export interface Opportunity {
   sector?: 'Privado' | 'Gubernamental'; // New field: Sector type
   quotation?: Quotation; // New: Associated quotation data
   status?: 'active' | 'deleted'; // New field for soft delete
-  
+
   // New fields for item details
   quantity?: number;
   unitPrice?: number;
@@ -146,6 +146,9 @@ export interface Opportunity {
   // New fields for Purchase Orders
   purchaseOrderFile?: string; // Base64 string of the PDF/Image
   purchaseOrderFileName?: string;
+
+  // UI state only - not persisted directly
+  dateChangeObservation?: string;
 }
 
 export interface Activity {
@@ -236,7 +239,7 @@ export interface Task {
   department: string; // e.g. 'Ventas', 'RRHH', 'Gerencia'
   priority: TaskPriority;
   status: TaskStatus;
-  createdAt: string; 
+  createdAt: string;
   startedAt?: string; // Timestamp when moved to En Proceso
   finishedAt?: string; // Timestamp when moved to Finalizada
 }
@@ -259,7 +262,7 @@ export interface Purchase {
   amount: number;
   registeredBy: string;
   dte?: string; // New field: Documento Tributario Electronico
-  
+
   // File attachment
   fileUrl?: string; // Base64
   fileName?: string;
@@ -287,7 +290,7 @@ export interface Expense {
   registeredBy: string;
   dte?: string; // New field: Documento Tributario Electronico
   projectId?: string; // LINK TO PROJECT
-  
+
   // File attachment
   fileUrl?: string; // Base64
   fileName?: string;
