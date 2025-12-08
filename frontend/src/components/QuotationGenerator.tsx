@@ -223,14 +223,22 @@ export const QuotationGenerator: React.FC<QuotationGeneratorProps> = ({ opportun
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-y-auto print:p-0 print:bg-white pt-8 pb-32">
+        <div className="fixed inset-0 bg-slate-900/80 z-50 flex items-start justify-center overflow-y-auto print:p-0 print:bg-white animate-in fade-in duration-200 backdrop-blur-sm">
             <style>{`
         @media print {
             @page { size: A4 portrait; margin: 0; }
             body { -webkit-print-color-adjust: exact; }
         }
+        /* Custom Scrollbar for Modal */
+        .modal-scroll::-webkit-scrollbar { width: 8px; }
+        .modal-scroll::-webkit-scrollbar-track { bg-transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.2); border-radius: 4px; }
       `}</style>
-            <div className="bg-white w-[21cm] min-h-[29.7cm] shadow-2xl mx-auto relative flex flex-col print:shadow-none print:w-full mb-8">
+
+            {/* Close Overlay Click Area */}
+            <div className="absolute inset-0 w-full h-full" onClick={onClose}></div>
+
+            <div className="relative bg-white w-[21cm] min-h-[29.7cm] shadow-2xl mx-auto flex flex-col print:shadow-none print:w-full my-8 md:my-10 scale-[0.85] md:scale-100 origin-top transition-transform duration-200">
 
                 {externalFile ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-10 bg-slate-50 border-2 border-dashed border-slate-300 m-8 rounded-xl">

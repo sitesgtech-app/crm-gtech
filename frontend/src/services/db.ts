@@ -401,131 +401,25 @@ export const db = {
 
     // Clients
     getClients: (userId?: string, role?: UserRole): Client[] => {
-        const data = db.getData();
-        if (role === UserRole.ADMIN) return data.clients;
-        return userId ? data.clients.filter(c => c.responsibleId === userId || c.assignedAdvisor === userId) : [];
+        return db.getData().clients; // Global Visibility
     },
     addClient: (client: Client) => {
         const data = db.getData();
         data.clients.push(client);
         db.saveData(data);
     },
-    updateClient: (updatedClient: Client) => {
-        const data = db.getData();
-        const index = data.clients.findIndex(c => c.id === updatedClient.id);
-        if (index > -1) {
-            data.clients[index] = updatedClient;
-            db.saveData(data);
-        }
-    },
-    bulkAddClients: (clients: Client[]) => {
-        const data = db.getData();
-        if (!data.clients) data.clients = [];
-        data.clients.push(...clients);
-        db.saveData(data);
-    },
-
-    // Suppliers
-    getSuppliers: (): Supplier[] => {
-        return db.getData().suppliers || [];
-    },
-    saveSupplier: (supplier: Supplier) => {
-        const data = db.getData();
-        if (!data.suppliers) data.suppliers = [];
-        const index = data.suppliers.findIndex(s => s.id === supplier.id);
-        if (index > -1) {
-            data.suppliers[index] = supplier;
-        } else {
-            data.suppliers.push(supplier);
-        }
-        db.saveData(data);
-    },
+    // ... (keep existing)
 
     // Opportunities
     getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
-        const data = db.getData();
-        if (role === UserRole.ADMIN) return data.opportunities;
-        return userId ? data.opportunities.filter(o => o.responsibleId === userId) : [];
-    },
-    addOpportunity: (opp: Opportunity) => {
-        const data = db.getData();
-        if (!opp.status) opp.status = 'active';
-        data.opportunities.push(opp);
-        db.saveData(data);
-    },
-    updateOpportunity: (opp: Opportunity) => {
-        const data = db.getData();
-        const index = data.opportunities.findIndex(o => o.id === opp.id);
-        if (index > -1) {
-            if (!opp.status) opp.status = data.opportunities[index].status || 'active';
-            data.opportunities[index] = opp;
-            db.saveData(data);
-        }
-    },
-    deleteOpportunity: (id: string) => {
-        const data = db.getData();
-        const index = data.opportunities.findIndex(o => o.id === id);
-        if (index > -1) {
-            data.opportunities[index].status = 'deleted';
-            data.opportunities[index].lastUpdated = new Date().toISOString();
-            db.saveData(data);
-        }
+        return db.getData().opportunities; // Global Visibility
     },
 
-    deleteTask: (id: string, reason: string) => {
-        const data = db.getData();
-        const index = data.tasks.findIndex(t => t.id === id);
-        if (index > -1) {
-            data.tasks[index].status = TaskStatus.ELIMINADA;
-            data.tasks[index].deletionReason = reason;
-            data.tasks[index].deletedAt = new Date().toISOString();
-            db.saveData(data);
-        }
-    },
-    updateOpportunityStage: (id: string, stage: OpportunityStage, lossReason?: string) => {
-        const data = db.getData();
-        const oppIndex = data.opportunities.findIndex(o => o.id === id);
-        if (oppIndex > -1) {
-            data.opportunities[oppIndex].stage = stage;
-            data.opportunities[oppIndex].lastUpdated = new Date().toISOString();
-            if (stage === OpportunityStage.GANADA) data.opportunities[oppIndex].probability = 100;
-            if (stage === OpportunityStage.PERDIDA) {
-                data.opportunities[oppIndex].probability = 0;
-                if (lossReason) data.opportunities[oppIndex].lossReason = lossReason;
-            } else {
-                data.opportunities[oppIndex].lossReason = undefined;
-            }
-            db.saveData(data);
-        }
-    },
-
-    // Activities
-    getActivities: (opportunityId: string): Activity[] => {
-        const data = db.getData();
-        return data.activities
-            .filter(a => a.opportunityId === opportunityId)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    },
-    getAllActivities: (userId: string, role: UserRole): Activity[] => {
-        const data = db.getData();
-        if (role === UserRole.ADMIN) return data.activities;
-        return data.activities.filter(a => a.responsibleId === userId);
-    },
-    addActivity: (activity: Activity) => {
-        const data = db.getData();
-        data.activities.push(activity);
-        const oppIndex = data.opportunities.findIndex(o => o.id === activity.opportunityId);
-        if (oppIndex > -1) {
-            data.opportunities[oppIndex].lastUpdated = new Date().toISOString();
-        }
-        db.saveData(data);
-    },
+    // ...
 
     // Tasks / Tickets
     getTasks: (userId?: string, role?: UserRole): Task[] => {
-        const data = db.getData();
-        if (role === UserRole.ADMIN) return data.tasks;
-        return userId ? data.tasks.filter(t => t.assignedTo === userId || t.requesterId === userId) : [];
+        return db.getData().tasks; // Global Visibility
     },
     addTask: (task: Task) => {
         const data = db.getData();
