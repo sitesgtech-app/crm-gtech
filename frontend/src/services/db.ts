@@ -503,7 +503,14 @@ export const db = {
 
     // Opportunities
     getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
-        return db.getData().opportunities; // Global Visibility
+        const data = db.getData();
+        if (role === 'ADMIN') {
+            return data.opportunities;
+        }
+        if (userId) {
+            return data.opportunities.filter(o => o.responsibleId === userId);
+        }
+        return [];
     },
     addOpportunity: (opp: Opportunity) => {
         const data = db.getData();

@@ -44,7 +44,7 @@ export const register = async (req: Request, res: Response) => {
             },
         });
 
-        const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET as string, {
+        const token = jwt.sign({ userId: user.id, role: user.role, organizationId: user.organizationId }, process.env.JWT_SECRET as string, {
             expiresIn: '24h',
         });
 
@@ -74,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ error: 'Contraseña incorrecta (Debug)' });
         }
 
-        const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET as string, {
+        const token = jwt.sign({ userId: user.id, role: user.role, organizationId: user.organizationId }, process.env.JWT_SECRET as string, {
             expiresIn: '24h',
         });
 
