@@ -31,6 +31,8 @@ router.get('/clients/:id', clientController.getClient);
 // Deal Routes
 router.get('/deals', dealController.getDeals);
 router.post('/deals', dealController.createDeal);
+router.put('/deals/:id', dealController.updateDeal);
+router.delete('/deals/:id', dealController.deleteDeal);
 router.patch('/deals/:id/stage', dealController.updateDealStage);
 
 // Ticket Routes

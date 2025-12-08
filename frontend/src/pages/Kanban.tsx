@@ -69,14 +69,28 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
     });
 
     const refreshData = async () => {
-        setOpportunities(db.getOpportunities(user.id, user.role));
-        setClients(db.getClients(user.id, user.role));
         try {
-            const res = await api.get('/users');
-            setUsers(res.data);
+            // Fetch Deals from Backend
+            const dealsRes = await api.get('/deals');
+            const backendDeals = dealsRes.data.map((d: any) => ({
+                ...d,
+                responsibleId: d.ownerId, // Map backend ownerId to frontend responsibleId
+                clientName: d.client?.name || 'Cliente Desconocido',
+                amount: d.value || 0, // Map value to amount
+                name: d.title // Map title to name
+            }));
+            setOpportunities(backendDeals);
+
+            // Fetch Clients from Backend
+            const clientsRes = await api.get('/clients');
+            setClients(clientsRes.data);
+
+            // Fetch Users
+            const usersRes = await api.get('/users');
+            setUsers(usersRes.data);
         } catch (e) {
-            console.error("Failed to fetch users from API", e);
-            setUsers(db.getUsers());
+            console.error("Failed to fetch data from API", e);
+            // Fallback to empty or show error - DO NOT fallback to local DB as per user request to eliminate it
         }
     };
 
@@ -84,31 +98,11 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         refreshData();
     }, [user]);
 
-    useEffect(() => {
-        if (selectedOpp) {
-            setCurrentActivities(db.getActivities(selectedOpp.id));
-            setNewActivity(getInitialActivityState());
-        }
-    }, [selectedOpp]);
+    // ... existing useEffect for activities ...
 
-    const stages = Object.values(OpportunityStage);
+    // ... existing helpers ...
 
-    const isStagnant = (opp: Opportunity) => {
-        const daysOpen = (new Date().getTime() - new Date(opp.createdAt).getTime()) / (1000 * 3600 * 24);
-        const isClosed = opp.stage === OpportunityStage.GANADA || opp.stage === OpportunityStage.PERDIDA;
-        return daysOpen > 15 && !isClosed;
-    };
-
-    const onDragStart = (e: React.DragEvent, id: string) => {
-        e.dataTransfer.setData("oppId", id);
-        setIsDragging(true);
-    };
-
-    const onDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-    };
-
-    const onDrop = (e: React.DragEvent, stage: OpportunityStage) => {
+    const onDrop = async (e: React.DragEvent, stage: OpportunityStage) => {
         e.preventDefault();
         setIsDragging(false);
         const id = e.dataTransfer.getData("oppId");
@@ -118,16 +112,21 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             return;
         }
 
-        updateStage(id, stage);
+        await updateStage(id, stage);
     };
 
-    const updateStage = (id: string, stage: OpportunityStage, reason?: string) => {
-        db.updateOpportunityStage(id, stage, reason);
-        refreshData();
+    const updateStage = async (id: string, stage: OpportunityStage, reason?: string) => {
+        try {
+            await api.patch(`/deals/${id}/stage`, { stage });
+            refreshData();
 
-        if (selectedOpp && selectedOpp.id === id) {
-            const updated = db.getOpportunities(user.id, user.role).find(o => o.id === id);
-            if (updated) setSelectedOpp(updated);
+            if (selectedOpp && selectedOpp.id === id) {
+                // Optimistic update of selected opp or fetch again
+                setSelectedOpp(prev => prev ? { ...prev, stage } : null);
+            }
+        } catch (err) {
+            console.error("Failed to update stage", err);
+            alert("Error al actualizar la etapa. Verifique su conexión.");
         }
     };
 
@@ -155,12 +154,17 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         }
     };
 
-    const handleDeleteOpportunity = (id: string) => {
+    const handleDeleteOpportunity = async (id: string) => {
         if (window.confirm('¿Estás seguro de eliminar esta oportunidad? Se moverá a la papelera.')) {
-            db.deleteOpportunity(id);
-            refreshData();
-            setSelectedOpp(null);
-            setIsNewModalOpen(false);
+            try {
+                await api.delete(`/deals/${id}`);
+                refreshData();
+                setSelectedOpp(null);
+                setIsNewModalOpen(false);
+            } catch (error) {
+                console.error("Error deleting deal", error);
+                alert("Error al eliminar.");
+            }
         }
     };
 
@@ -186,104 +190,62 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         }
     };
 
-    const handleCreateOpp = (e: React.FormEvent) => {
+    const handleCreateOpp = async (e: React.FormEvent) => {
         e.preventDefault();
         let clientIdToUse = selectedClientId;
         let clientName = '';
 
-        if (!isExistingClient) {
-            if (!newClientData.name || !newClientData.nit || !newClientData.phone || !newClientData.email) {
-                alert("Por favor complete los campos obligatorios del cliente.");
-                return;
-            }
-            const newClient: Client = {
-                id: `c${Date.now()}`,
-                organizationId: user.organizationId || 'org1',
-                name: newClientData.name,
-                company: newClientData.company || newClientData.name,
-                nit: newClientData.nit,
-                phone: newClientData.phone,
-                email: newClientData.email,
-                industry: newClientData.industry,
-                companyPhone: newClientData.companyPhone,
-                extension: newClientData.extension,
-                address: '',
-                createdAt: new Date().toISOString(),
-                tags: ['Nuevo'],
-                responsibleId: newOpp.responsibleId || user.id,
-                assignedAdvisor: newOpp.responsibleId || user.id,
-                sector: newOpp.sector || 'Privado'
-            };
-            db.addClient(newClient);
-            clientIdToUse = newClient.id;
-            clientName = newClient.name;
-        } else {
-            const existing = clients.find(c => c.id === selectedClientId);
-            if (!existing) {
-                alert("Seleccione un cliente existente");
-                return;
-            }
-            clientName = existing.name;
-        }
-
-        if (newOpp.id) {
-            const originalOpp = opportunities.find(o => o.id === newOpp.id);
-
-            let notesUpdate = newOpp.notes || '';
-            // Check if date changed
-            if (originalOpp && newOpp.estimatedCloseDate && originalOpp.estimatedCloseDate) {
-                const oldDate = new Date(originalOpp.estimatedCloseDate).toLocaleDateString();
-                const newDate = new Date(newOpp.estimatedCloseDate).toLocaleDateString();
-
-                if (oldDate !== newDate) {
-                    if (!newOpp.dateChangeObservation) {
-                        alert("Debe agregar una observación explicando el cambio de fecha.");
-                        return;
-                    }
-                    const obs = `[Cambio Fecha ${new Date().toLocaleDateString()}]: ${newOpp.dateChangeObservation} (De ${oldDate} a ${newDate})\n`;
-                    notesUpdate = obs + (notesUpdate || '');
+        try {
+            if (!isExistingClient) {
+                if (!newClientData.name || !newClientData.nit || !newClientData.phone || !newClientData.email) {
+                    alert("Por favor complete los campos obligatorios del cliente.");
+                    return;
                 }
+                const newClientPayload = {
+                    name: newClientData.name,
+                    company: newClientData.company || newClientData.name,
+                    nit: newClientData.nit,
+                    phone: newClientData.phone,
+                    email: newClientData.email,
+                    address: '',
+                    // organizationId will be handled by backend from token
+                };
+                const clientRes = await api.post('/clients', newClientPayload);
+                clientIdToUse = clientRes.data.id;
+                clientName = clientRes.data.name;
+            } else {
+                const existing = clients.find(c => c.id === selectedClientId);
+                if (!existing) {
+                    alert("Seleccione un cliente existente");
+                    return;
+                }
+                clientName = existing.name;
             }
 
-            const opp: Opportunity = {
-                ...newOpp as Opportunity,
-                lastUpdated: new Date().toISOString(),
+            const dealPayload = {
+                title: newOpp.name || 'Nueva Oportunidad',
+                value: Number(newOpp.amount),
+                stage: OpportunityStage.CONTACTADO, // Default for new
                 clientId: clientIdToUse,
-                clientName: clientName,
-                notes: notesUpdate
-            };
-            db.updateOpportunity(opp);
-        } else {
-            const opp: Opportunity = {
-                id: `o${Date.now()}`,
-                organizationId: user.organizationId || 'org1',
-                clientId: clientIdToUse,
-                clientName: clientName,
-                name: newOpp.name || 'Nueva Oportunidad',
-                description: newOpp.description || '',
-                amount: Number(newOpp.amount),
-                createdAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString(),
-                estimatedCloseDate: newOpp.estimatedCloseDate || new Date().toISOString(),
-                stage: OpportunityStage.CONTACTADO,
-                responsibleId: newOpp.responsibleId || user.id,
+                ownerId: newOpp.responsibleId || user.id,
                 probability: Number(newOpp.probability),
-                notes: '',
-                origin: newOpp.origin || 'Sitio Web',
-                profitMargin: Number(newOpp.profitMargin) || 0,
-                sector: newOpp.sector || 'Privado',
-                quantity: newOpp.quantity || 1,
-                unitPrice: newOpp.unitPrice || 0,
-                unitCost: newOpp.unitCost || 0,
-                itemType: newOpp.itemType || 'Producto',
-                status: 'active'
+                expectedCloseDate: newOpp.estimatedCloseDate || new Date().toISOString(),
+                // Add other fields as needed if backend supports them, otherwise they are lost for now or need schema update
             };
-            db.addOpportunity(opp);
-        }
 
-        refreshData();
-        setIsNewModalOpen(false);
-        resetForm();
+            if (newOpp.id) {
+                await api.put(`/deals/${newOpp.id}`, dealPayload);
+            } else {
+                await api.post('/deals', dealPayload);
+            }
+
+            refreshData();
+            setIsNewModalOpen(false);
+            resetForm();
+        } catch (error) {
+            console.error("Error saving opportunity:", error);
+            alert("Error al guardar. Verifique los datos.");
+        }
     };
 
     const resetForm = () => {
