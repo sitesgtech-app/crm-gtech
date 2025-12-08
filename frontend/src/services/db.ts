@@ -493,7 +493,7 @@ export const db = {
             n.type === 'motivation' &&
             new Date(n.date).toDateString() === today
         );
-    }
+    },
     addClient: (client: Client) => {
         const data = db.getData();
         data.clients.push(client);
