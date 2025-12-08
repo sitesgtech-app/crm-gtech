@@ -258,19 +258,48 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                 clientName = existing.name;
             }
 
+            // Mapping Stages Frontend (Spanish) -> Backend (English ENUM)
+            const mapStageToBackend = (frontendStage: string) => {
+                switch (frontendStage) {
+                    case OpportunityStage.CONTACTADO: return 'CONTACTED';
+                    case OpportunityStage.SOLICITUD: return 'LEAD'; // or another mapping
+                    case OpportunityStage.PROPUESTA: return 'PROPOSAL';
+                    case OpportunityStage.NEGOCIACION: return 'NEGOTIATION';
+                    case OpportunityStage.GANADA: return 'CLOSED_WON';
+                    case OpportunityStage.PERDIDA: return 'CLOSED_LOST';
+                    default: return 'LEAD';
+                }
+            };
+
             const dealPayload = {
                 title: newOpp.name || 'Nueva Oportunidad',
                 value: Number(newOpp.amount),
-                stage: OpportunityStage.CONTACTADO, // Default for new
+                stage: mapStageToBackend(OpportunityStage.CONTACTADO), // Default for new is CONTACTED -> CONTACTED
                 clientId: clientIdToUse,
                 ownerId: newOpp.responsibleId || user.id,
                 probability: Number(newOpp.probability),
                 expectedCloseDate: newOpp.estimatedCloseDate || new Date().toISOString(),
-                // Add other fields as needed if backend supports them, otherwise they are lost for now or need schema update
             };
 
             if (newOpp.id) {
-                await api.put(`/deals/${newOpp.id}`, dealPayload);
+                // If editing, we might need to map the current stage if it's being updated
+                // But handleCreateOpp usually resets stage or uses default for new? 
+                // Ah, this form is for CREATE or EDIT. 
+                // If EDIT, we should preserve stage properly? 
+                // Currently code said `stage: OpportunityStage.CONTACTADO` hardcoded for payload?
+                // Wait, line 264 in original code said: `stage: OpportunityStage.CONTACTADO`. 
+                // This means EVERY edit resets stage to CONTACTADO? That's a bug too!
+                // Let's fix that.
+
+                if (newOpp.id) {
+                    // For edit, use existing stage but mapped
+                    const existingOpp = opportunities.find(o => o.id === newOpp.id);
+                    const currentStage = existingOpp ? existingOpp.stage : OpportunityStage.CONTACTADO;
+                    dealPayload.stage = mapStageToBackend(currentStage);
+                    await api.put(`/deals/${newOpp.id}`, dealPayload);
+                } else {
+                    await api.post('/deals', dealPayload);
+                }
             } else {
                 await api.post('/deals', dealPayload);
             }

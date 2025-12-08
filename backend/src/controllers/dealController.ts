@@ -56,6 +56,11 @@ export const createDeal = async (req: Request, res: Response) => {
         });
         res.status(201).json(deal);
     } catch (error) {
+        console.error("Create Deal Error", error);
+        if (error instanceof z.ZodError) {
+            console.error("Validation failed:", error.errors);
+            return res.status(400).json({ error: 'Validation failed', details: error.errors });
+        }
         res.status(400).json({ error: 'Invalid input' });
     }
 };
