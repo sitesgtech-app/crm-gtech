@@ -478,10 +478,10 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
     };
 
     return (
-        <div className="h-full flex flex-col relative font-sans">
+        <div className="h-full flex flex-col relative font-sans bg-slate-100">
             {/* Header & Summary */}
-            <div className="mb-6 space-y-6">
-                <div className="bg-gradient-to-r from-brand-700 to-brand-900 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+            <div className="mb-6 space-y-6 pt-2">
+                <div className="bg-gradient-to-r from-brand-700 to-brand-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row justify-between items-center relative overflow-hidden mx-4 md:mx-0">
                     <div className="relative z-10">
                         <h1 className="text-2xl font-bold font-lato tracking-tight">Pipeline Comercial</h1>
                         <p className="text-brand-100 text-sm mt-1">Gestión visual de oportunidades y pronósticos.</p>
@@ -500,7 +500,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none"></div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div className="flex flex-col md:flex-row gap-4 justify-between items-center px-4 md:px-0">
                     <div className="relative flex-1 w-full md:w-auto">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                         <input
@@ -523,21 +523,17 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
             {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-                <div className="flex gap-4 h-full min-w-max px-4 md:px-6 snap-x snap-mandatory">
+                <div className="flex gap-4 h-full min-w-max px-4 md:px-0 snap-x snap-mandatory pb-4">
                     {stages.map((stage) => (
                         <div
                             key={stage}
-                            className={`w-[85vw] md:w-[350px] flex flex-col rounded-2xl max-h-full bg-slate-100/50 border border-slate-200/60 snap-center`}
+                            className={`w-[85vw] md:w-[320px] lg:w-[350px] flex flex-col rounded-2xl max-h-full bg-slate-50 border border-slate-200/60 snap-center shadow-sm`}
                             onDragOver={onDragOver}
                             onDrop={(e) => onDrop(e, stage)}
                         >
                             {/* Column Header */}
-                            <div className={`p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 bg-slate-100/90 backdrop-blur-md border-b border-white/50`}>
+                            <div className={`p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 bg-slate-50/90 backdrop-blur-md border-b border-slate-200/50 ${getStageColor(stage)}`}>
                                 <div className="flex items-center gap-2">
-                                    <span className={`w-3 h-3 rounded-full ${stage === OpportunityStage.GANADA ? 'bg-green-500' :
-                                        stage === OpportunityStage.PERDIDA ? 'bg-red-500' :
-                                            'bg-brand-500'
-                                        }`}></span>
                                     <span className="font-bold text-slate-700 font-lato text-sm uppercase tracking-wide">{stage}</span>
                                 </div>
                                 <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-100">
@@ -553,7 +549,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         draggable
                                         onDragStart={(e) => onDragStart(e, opp.id)}
                                         onClick={() => setSelectedOpp(opp)}
-                                        className={`bg-white p-4 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] border border-transparent hover:border-brand-200/50 cursor-pointer transition-all duration-300 group relative flex flex-col gap-3 hover:-translate-y-1`}
+                                        className={`bg-white p-4 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.06)] border border-slate-100 hover:border-brand-200 cursor-pointer transition-all duration-300 group relative flex flex-col gap-3 hover:-translate-y-1`}
                                     >
                                         {isStagnant(opp) && (
                                             <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white p-1 rounded-full shadow-sm z-10 animate-pulse ring-2 ring-white" title="Estancada > 15 días">
@@ -612,7 +608,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         </div>
 
                                         {/* Quick Actions Overlay (Visible on Hover) */}
-                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 hidden md:flex">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); openEditModal(opp); }}
                                                 className="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-brand-600 hover:bg-brand-50"
@@ -1007,7 +1003,23 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                             value={newActivity.description}
                                             onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
                                         />
-                                        <div className="absolute bottom-2 right-2 flex gap-2">
+                                        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="date"
+                                                    required
+                                                    className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
+                                                    value={newActivity.date}
+                                                    onChange={(e) => setNewActivity({ ...newActivity, date: e.target.value })}
+                                                />
+                                                <input
+                                                    type="time"
+                                                    required
+                                                    className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
+                                                    value={newActivity.time}
+                                                    onChange={(e) => setNewActivity({ ...newActivity, time: e.target.value })}
+                                                />
+                                            </div>
                                             <button type="submit" className="bg-brand-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-700 transition-colors shadow-sm">Guardar</button>
                                         </div>
                                     </div>
