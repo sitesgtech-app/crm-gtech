@@ -307,9 +307,21 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             refreshData();
             setIsNewModalOpen(false);
             resetForm();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error saving opportunity:", error);
-            alert("Error al guardar. Verifique los datos.");
+            const serverError = error.response?.data?.error;
+            const validationDetails = error.response?.data?.details;
+
+            let message = "Error al guardar. Verifique los datos.";
+            if (serverError) {
+                message = `Error del servidor: ${serverError}`;
+                if (validationDetails) {
+                    // Format Zod errors nicely
+                    const detailsStr = validationDetails.map((d: any) => `${d.path.join('.')}: ${d.message}`).join('\n');
+                    message += `\n\nDetalles:\n${detailsStr}`;
+                }
+            }
+            alert(message);
         }
     };
 
