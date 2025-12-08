@@ -827,9 +827,15 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         <input type="number" min="0" step="0.01" className="w-full border border-slate-200 rounded-xl p-2.5 font-bold bg-white" value={newOpp.unitPrice ? Number(newOpp.unitPrice).toFixed(2) : 0} onChange={e => handlePriceChange(Number(e.target.value))} />
                                     </div>
 
-                                    <div className="col-span-2 bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow-lg">
-                                        <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Monto Total (IVA Inc.)</span>
-                                        <span className="text-2xl font-bold font-lato">Q{Number(newOpp.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
+                                        <div className="bg-slate-100 p-4 rounded-xl flex flex-col justify-between items-start border border-slate-200">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Costo Total</span>
+                                            <span className="text-xl font-bold font-lato text-slate-700">Q{Number((newOpp.unitCost || 0) * (newOpp.quantity || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="bg-slate-900 text-white p-4 rounded-xl flex flex-col justify-between items-start shadow-lg">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Venta Total (IVA Inc.)</span>
+                                            <span className="text-xl font-bold font-lato">Q{Number(newOpp.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
                                     </div>
 
                                     <div className="col-span-2 bg-green-50 border border-green-100 p-4 rounded-xl">
