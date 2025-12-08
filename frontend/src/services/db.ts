@@ -414,6 +414,84 @@ export const db = {
     getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
         return db.getData().opportunities; // Global Visibility
     },
+    addOpportunity: (opp: Opportunity) => {
+        const data = db.getData();
+        data.opportunities.push(opp);
+        // Add activity log
+        data.activities.push({
+            id: `act${Date.now()}`,
+            opportunityId: opp.id,
+            clientId: opp.clientId,
+            type: 'Sistema',
+            description: 'Oportunidad Creada',
+            date: new Date().toISOString(),
+            responsibleId: opp.responsibleId,
+            responsibleName: 'Sistema'
+        });
+        db.saveData(data);
+    },
+    updateOpportunity: (opp: Opportunity) => {
+        const data = db.getData();
+        const index = data.opportunities.findIndex(o => o.id === opp.id);
+        if (index > -1) {
+            data.opportunities[index] = opp;
+            db.saveData(data);
+        }
+    },
+    deleteOpportunity: (id: string) => {
+        const data = db.getData();
+        const index = data.opportunities.findIndex(o => o.id === id);
+        if (index > -1) {
+            data.opportunities[index].status = 'deleted'; // Soft delete
+            db.saveData(data);
+        }
+    },
+    updateOpportunityStage: (id: string, stage: OpportunityStage, reason?: string) => {
+        const data = db.getData();
+        const index = data.opportunities.findIndex(o => o.id === id);
+        if (index > -1) {
+            const oldStage = data.opportunities[index].stage;
+            data.opportunities[index].stage = stage;
+            data.opportunities[index].lastUpdated = new Date().toISOString();
+
+            if (reason) {
+                const note = `[Cambio a ${stage}]: ${reason}`;
+                data.opportunities[index].notes = (data.opportunities[index].notes || '') + '\n' + note;
+            }
+
+            // Log activity
+            data.activities.push({
+                id: `act${Date.now()}`,
+                opportunityId: id,
+                clientId: data.opportunities[index].clientId,
+                type: 'Sistema',
+                description: `Cambio de etapa de ${oldStage} a ${stage}`,
+                date: new Date().toISOString(),
+                responsibleId: 'system',
+                responsibleName: 'Sistema'
+            });
+
+            db.saveData(data);
+        }
+    },
+    getActivities: (opportunityId: string): Activity[] => {
+        const data = db.getData();
+        return data.activities
+            .filter(a => a.opportunityId === opportunityId)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    },
+    addActivity: (activity: Activity) => {
+        const data = db.getData();
+        data.activities.push(activity);
+
+        // Update opportunity last interaction
+        const oppIndex = data.opportunities.findIndex(o => o.id === activity.opportunityId);
+        if (oppIndex > -1) {
+            data.opportunities[oppIndex].lastUpdated = new Date().toISOString();
+        }
+
+        db.saveData(data);
+    },
 
     // ...
 
