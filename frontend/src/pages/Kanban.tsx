@@ -524,111 +524,97 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
                 <div className="flex gap-4 h-full min-w-max px-4 md:px-0 snap-x snap-mandatory pb-4">
-                    {stages.map((stage) => (
-                        <div
-                            key={stage}
-                            className={`w-[85vw] md:w-[320px] lg:w-[350px] flex flex-col rounded-2xl max-h-full bg-slate-50 border border-slate-200/60 snap-center shadow-sm`}
-                            onDragOver={onDragOver}
-                            onDrop={(e) => onDrop(e, stage)}
-                        >
-                            {/* Column Header */}
-                            <div className={`p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 bg-slate-50/90 backdrop-blur-md border-b border-slate-200/50 ${getStageColor(stage)}`}>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-slate-700 font-lato text-sm uppercase tracking-wide">{stage}</span>
+                    {stages.map((stage) => {
+                        const stageOpps = filteredOpps.filter(o => o.stage === stage);
+                        const stageTotal = stageOpps.reduce((sum, o) => sum + o.amount, 0);
+                        const stageCount = stageOpps.length;
+
+                        return (
+                            <div
+                                key={stage}
+                                className={`w-[85vw] md:w-[320px] lg:w-[350px] flex flex-col rounded-none max-h-full bg-slate-50 border-r border-slate-200 snap-center`}
+                                onDragOver={onDragOver}
+                                onDrop={(e) => onDrop(e, stage)}
+                            >
+                                {/* Chevron Header */}
+                                <div className="h-20 bg-white border-b-4 border-slate-100 flex flex-col justify-center px-4 relative group hover:bg-slate-50 transition-colors">
+                                    <h3 className="uppercase text-sm font-bold text-slate-800 tracking-wider flex items-center gap-2">
+                                        {stage}
+                                        {stage === OpportunityStage.GANADA && <Check size={16} className="text-green-500" />}
+                                    </h3>
+                                    <p className="text-xs text-slate-400 mt-1 font-medium">
+                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })} <span className="text-slate-300">/</span> {stageCount} Deals
+                                    </p>
+
+                                    {/* Arrow Shape (Visual only using border trick or SVG for cleaner look) */}
+                                    <div className="absolute top-0 right-0 h-full w-6 overflow-hidden translate-x-full z-10">
+                                        <div className="h-full w-full bg-white origin-bottom-left transform -skew-x-12 border-r-4 border-slate-100 shadow-sm hidden"></div>
+                                    </div>
+                                    {/* Using a simple CSS Arrow for now - or just a clean separator line as requested "Chevron Style" implies flow */}
+                                    <div className="absolute top-1/2 -right-3 w-6 h-6 bg-white border-t border-r border-slate-200 transform rotate-45 z-10 hidden md:block"></div>
                                 </div>
-                                <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-100">
-                                    {filteredOpps.filter(o => o.stage === stage).length}
-                                </span>
-                            </div>
 
-                            {/* Cards Area */}
-                            <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar">
-                                {filteredOpps.filter(o => o.stage === stage).map((opp) => (
-                                    <div
-                                        key={opp.id}
-                                        draggable
-                                        onDragStart={(e) => onDragStart(e, opp.id)}
-                                        onClick={() => setSelectedOpp(opp)}
-                                        className={`bg-white p-4 rounded-xl shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.06)] border border-slate-100 hover:border-brand-200 cursor-pointer transition-all duration-300 group relative flex flex-col gap-3 hover:-translate-y-1`}
-                                    >
-                                        {isStagnant(opp) && (
-                                            <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white p-1 rounded-full shadow-sm z-10 animate-pulse ring-2 ring-white" title="Estancada > 15 días">
-                                                <AlertCircle className="w-3 h-3" />
-                                            </div>
-                                        )}
+                                {/* Cards Area */}
+                                <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
+                                    {stageOpps.map((opp) => (
+                                        <div
+                                            key={opp.id}
+                                            draggable
+                                            onDragStart={(e) => onDragStart(e, opp.id)}
+                                            onClick={() => setSelectedOpp(opp)}
+                                            className={`bg-white p-4 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-2 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
+                                        >
+                                            {/* Top Row: Dot + Name */}
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-start gap-2">
+                                                    <div className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-800 text-sm leading-tight font-lato group-hover:text-brand-700">{opp.name}</h4>
+                                                        <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
+                                                            <Building size={10} />
+                                                            <span className="truncate max-w-[150px]">{opp.clientName}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                        {/* Tags Row */}
-                                        <div className="flex justify-between items-start">
-                                            <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${opp.sector === 'Gubernamental'
-                                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                                : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
-                                                }`}>
-                                                {opp.sector || 'Privado'}
-                                            </div>
-                                            <div className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
-                                                <Calendar size={10} />
-                                                {new Date(opp.createdAt).toLocaleDateString()}
-                                            </div>
-                                        </div>
-
-                                        {/* Main Content */}
-                                        <div>
-                                            <h4 className="font-bold text-slate-800 line-clamp-2 text-sm leading-snug mb-1 font-lato group-hover:text-brand-700 transition-colors">{opp.name}</h4>
-                                            <p className="text-xs text-slate-500 truncate flex items-center gap-1.5">
-                                                <Building size={12} className="text-slate-400" />
-                                                {opp.clientName}
-                                            </p>
-                                        </div>
-
-                                        {/* Footer Row */}
-                                        <div className="flex items-end justify-between pt-2 border-t border-slate-50 mt-1">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Valor</span>
-                                                <span className="text-base font-bold text-slate-800 font-lato">Q{opp.amount.toLocaleString(undefined, { compactDisplay: 'short' })}</span>
+                                                {/* Sentiment / Probability Icon */}
+                                                {opp.probability >= 80 ? <div className="text-green-500"><TrendingUp size={16} /></div> :
+                                                    opp.probability <= 30 ? <div className="text-amber-400"><AlertCircle size={16} /></div> :
+                                                        <div className="text-slate-300"><PieChart size={16} /></div>
+                                                }
                                             </div>
 
-                                            <div className="flex items-center gap-2">
-                                                {/* Probability Badge */}
-                                                <div className={`flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold ${opp.probability >= 80 ? 'bg-green-100 text-green-700' :
-                                                    opp.probability >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                                                        'bg-slate-100 text-slate-600'
-                                                    }`}>
+                                            {/* Middle Row: Amount & Details */}
+                                            <div className="flex items-center justify-start gap-3 mt-1 pl-4">
+                                                <p className="text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
+                                                <div className="h-3 w-px bg-slate-200"></div>
+                                                <div className="flex items-center gap-1 text-xs text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                                                    <Calculator size={10} />
                                                     {opp.probability}%
                                                 </div>
-
-                                                {/* Responsible Avatar */}
-                                                <div className="relative group/avatar">
-                                                    <img
-                                                        src={getResponsibleAvatar(opp.responsibleId) || `https://ui-avatars.com/api/?name=User`}
-                                                        alt="User"
-                                                        className="w-7 h-7 rounded-full ring-2 ring-white shadow-sm object-cover"
-                                                    />
-                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* Quick Actions Overlay (Visible on Hover) */}
-                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 hidden md:flex">
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); openEditModal(opp); }}
-                                                className="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-brand-600 hover:bg-brand-50"
-                                            >
-                                                <Edit size={12} />
-                                            </button>
-                                            {(opp.stage === OpportunityStage.SOLICITUD || opp.stage === OpportunityStage.PROPUESTA || opp.stage === OpportunityStage.NEGOCIACION || opp.quotation) && (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleOpenQuotation(opp); }}
-                                                    className="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-brand-600 hover:bg-brand-50"
-                                                >
-                                                    <FileText size={12} />
-                                                </button>
+                                            {/* Stagnant Warning */}
+                                            {isStagnant(opp) && (
+                                                <div className="mt-2 text-[10px] text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1">
+                                                    <Clock size={10} />
+                                                    <span>Sin actividad reciente</span>
+                                                </div>
                                             )}
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+
+                                    {/* Empty State placeholder */}
+                                    {stageOpps.length === 0 && (
+                                        <div className="h-32 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-xl m-2">
+                                            <Package size={24} className="mb-2 opacity-50" />
+                                            <span className="text-xs font-medium">Sin tratos</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 
