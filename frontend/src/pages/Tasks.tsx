@@ -30,47 +30,82 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
     const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
     const [deleteReason, setDeleteReason] = useState('');
 
-    useEffect(() => { refreshData(); }, [user]);
+    useEffect(() => { refreshData(); }, [user, viewMode]);
 
     const refreshData = async () => {
-        // Fetch all tasks (we will filter in render)
-        const allTasks = db.getTasks(user.id, user.role);
-        setTasks(allTasks);
-
         try {
-            const { data } = await api.get('/users');
-            setUsers(data);
+            // Fetch Users
+            try {
+                const usersResponse = await api.get('/users');
+                setUsers(usersResponse.data);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                setUsers(db.getUsers()); // Fallback
+            }
+
+            // Fetch Tasks based on View Mode
+            let tasksResponse;
+            if (viewMode === 'active') {
+                tasksResponse = await api.get('/tickets');
+            } else {
+                tasksResponse = await api.get('/tickets/trash');
+            }
+
+            // Map backend Ticket to frontend Task
+            const mappedTasks: Task[] = tasksResponse.data.map((t: any) => ({
+                id: t.id,
+                title: t.title,
+                description: t.description,
+                assignedTo: t.assignedToId || '',
+                requesterId: t.requesterId || '',
+                department: t.department || 'General',
+                priority: t.priority, // Ensure Enum matches or map it
+                status: t.status, // Ensure Enum matches
+                createdAt: t.createdAt,
+                deletedAt: t.deletedAt,
+                deletionReason: t.deletionReason
+            }));
+
+            setTasks(mappedTasks);
         } catch (error) {
-            console.error('Error fetching users for tasks:', error);
-            // Fallback to local users if API fails, or keep empty
-            setUsers(db.getUsers());
+            console.error('Error fetching tasks:', error);
+            // Fallback? Maybe not for production request
+            // setTasks(db.getTasks(user.id, user.role));
         }
     };
 
-    const handleSaveTask = (e: React.FormEvent) => {
+    const handleSaveTask = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentTask.description || !currentTask.assignedTo || !currentTask.title) return;
 
-        if (currentTask.id) {
-            const taskToUpdate = { ...currentTask } as Task;
-            db.updateTask(taskToUpdate);
-        } else {
-            const task: Task = {
-                id: `t${Date.now()}`,
-                title: currentTask.title!,
-                description: currentTask.description!,
-                assignedTo: currentTask.assignedTo!,
+        try {
+            const taskData = {
+                title: currentTask.title,
+                description: currentTask.description,
+                assignedToId: currentTask.assignedTo,
                 requesterId: currentTask.requesterId || user.id,
                 priority: currentTask.priority || TaskPriority.MEDIA,
                 department: currentTask.department || 'General',
-                status: TaskStatus.RECIBIDA,
-                createdAt: new Date().toISOString()
+                clientId: 'c1' // Temporary hardcoded or handle dynamically if needed
             };
-            db.addTask(task);
+
+            if (currentTask.id) {
+                // Update Ticket Logic (Might need specific endpoint for full update if ticketController doesn't have it yet)
+                // For now backend only verified updateStatus. 
+                // Assuming we might need to add full update later, but let's try calling patch if available or just log warning
+                alert("La edición completa aun no está implementada en el backend, solo estado.");
+                // await api.put(`/tickets/${currentTask.id}`, taskData);
+            } else {
+                await api.post('/tickets', taskData);
+            }
+
+            refreshData();
+            setIsModalOpen(false);
+            resetForm();
+        } catch (error) {
+            console.error("Error saving ticket", error);
+            alert("Error al guardar el ticket");
         }
-        refreshData();
-        setIsModalOpen(false);
-        resetForm();
     };
 
     const handleDeleteClick = (taskId: string) => {
@@ -79,13 +114,20 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = (e: React.FormEvent) => {
+    const confirmDelete = async (e: React.FormEvent) => {
         e.preventDefault();
         if (taskToDelete && deleteReason) {
-            db.deleteTask(taskToDelete, deleteReason);
-            setIsDeleteModalOpen(false);
-            setTaskToDelete(null);
-            refreshData();
+            try {
+                await api.delete(`/tickets/${taskToDelete}`, {
+                    data: { reason: deleteReason }
+                });
+                setIsDeleteModalOpen(false);
+                setTaskToDelete(null);
+                refreshData();
+            } catch (error) {
+                console.error("Error deleting ticket", error);
+                alert("Error al eliminar ticket");
+            }
         }
     };
 
@@ -96,10 +138,13 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
     const openNewModal = () => { resetForm(); setIsModalOpen(true); };
     const openEditModal = (task: Task) => { setCurrentTask(task); setIsModalOpen(true); };
 
-    const updateTaskStatus = (task: Task, newStatus: TaskStatus) => {
-        const updated = { ...task, status: newStatus };
-        db.updateTask(updated);
-        refreshData();
+    const updateTaskStatus = async (task: Task, newStatus: TaskStatus) => {
+        try {
+            await api.patch(`/tickets/${task.id}/status`, { status: newStatus });
+            refreshData();
+        } catch (error) {
+            console.error("Error updating status", error);
+        }
     };
 
     const getUserName = (id: string) => users.find(u => u.id === id)?.name || 'Desconocido';
@@ -115,10 +160,14 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
         return matchesSearch && matchesDept;
     });
 
-    const handleRestoreTask = (task: Task) => {
-        const updated = { ...task, status: TaskStatus.RECIBIDA, deletionReason: undefined, deletedAt: undefined };
-        db.updateTask(updated);
-        refreshData();
+    const handleRestoreTask = async (task: Task) => {
+        try {
+            await api.post(`/tickets/${task.id}/restore`);
+            refreshData();
+        } catch (error) {
+            console.error("Error restoring ticket", error);
+            alert("Error al restaurar ticket");
+        }
     };
 
     const stats = useMemo(() => ({

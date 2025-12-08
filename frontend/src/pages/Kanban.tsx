@@ -522,19 +522,25 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             </div>
 
             {/* Kanban Board */}
-            <div className="flex-1 overflow-x-auto pb-4">
-                <div className="flex gap-6 h-full min-w-max pb-4 px-1">
+            <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
+                <div className="flex gap-4 h-full min-w-max px-4 md:px-6 snap-x snap-mandatory">
                     {stages.map((stage) => (
                         <div
                             key={stage}
-                            className={`w-80 flex flex-col rounded-xl max-h-full border border-slate-200 shadow-sm bg-slate-50/50 backdrop-blur-sm`}
+                            className={`w-[85vw] md:w-[350px] flex flex-col rounded-2xl max-h-full bg-slate-100/50 border border-slate-200/60 snap-center`}
                             onDragOver={onDragOver}
                             onDrop={(e) => onDrop(e, stage)}
                         >
                             {/* Column Header */}
-                            <div className={`p-4 rounded-t-xl font-bold text-sm flex justify-between items-center sticky top-0 z-10 border-b border-slate-200 ${getStageColor(stage)}`}>
-                                <span className="font-lato text-slate-800">{stage}</span>
-                                <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold text-slate-600 shadow-sm">
+                            <div className={`p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 bg-slate-100/90 backdrop-blur-md border-b border-white/50`}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-3 h-3 rounded-full ${stage === OpportunityStage.GANADA ? 'bg-green-500' :
+                                            stage === OpportunityStage.PERDIDA ? 'bg-red-500' :
+                                                'bg-brand-500'
+                                        }`}></span>
+                                    <span className="font-bold text-slate-700 font-lato text-sm uppercase tracking-wide">{stage}</span>
+                                </div>
+                                <span className="bg-white px-2.5 py-0.5 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-100">
                                     {filteredOpps.filter(o => o.stage === stage).length}
                                 </span>
                             </div>
@@ -547,67 +553,81 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         draggable
                                         onDragStart={(e) => onDragStart(e, opp.id)}
                                         onClick={() => setSelectedOpp(opp)}
-                                        className={`bg-white p-4 rounded-xl shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all group relative border-l-4 ${getCardBorderColor(opp)} hover:-translate-y-1 duration-300 flex flex-col gap-2`}
+                                        className={`bg-white p-4 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] border border-transparent hover:border-brand-200/50 cursor-pointer transition-all duration-300 group relative flex flex-col gap-3 hover:-translate-y-1`}
                                     >
                                         {isStagnant(opp) && (
-                                            <div className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-sm z-10 animate-pulse" title="Estancada > 15 días">
-                                                <AlertCircle className="w-4 h-4" />
+                                            <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white p-1 rounded-full shadow-sm z-10 animate-pulse ring-2 ring-white" title="Estancada > 15 días">
+                                                <AlertCircle className="w-3 h-3" />
                                             </div>
                                         )}
 
-                                        {/* Header: Client & Sector */}
+                                        {/* Tags Row */}
                                         <div className="flex justify-between items-start">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[60%] flex items-center gap-1">
-                                                <Building size={10} /> {opp.clientName}
-                                            </span>
-                                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase flex items-center gap-1 ${opp.sector === 'Gubernamental' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-slate-50 text-slate-500 border border-slate-100'
+                                            <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${opp.sector === 'Gubernamental'
+                                                    ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                                    : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
                                                 }`}>
                                                 {opp.sector || 'Privado'}
-                                            </span>
-                                        </div>
-
-                                        {/* Title */}
-                                        <h4 className="font-bold text-slate-800 line-clamp-2 font-lato text-sm leading-snug">{opp.name}</h4>
-
-                                        {/* Amount & Avatar Row */}
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-lg font-bold text-slate-900 font-lato">Q{opp.amount.toLocaleString()}</p>
-                                                <p className="text-[10px] text-slate-400 font-medium">{opp.probability}% Probabilidad</p>
                                             </div>
-                                            <div className="relative">
-                                                <img
-                                                    src={getResponsibleAvatar(opp.responsibleId) || `https://ui-avatars.com/api/?name=User`}
-                                                    alt="User"
-                                                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                                                    title="Responsable"
-                                                />
+                                            <div className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                                                <Calendar size={10} />
+                                                {new Date(opp.createdAt).toLocaleDateString()}
                                             </div>
                                         </div>
 
-                                        {/* --- ALWAYS VISIBLE ACTION BUTTONS --- */}
-                                        <div className="mt-2 pt-2 border-t border-slate-50 flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                            {(opp.stage === OpportunityStage.SOLICITUD || opp.stage === OpportunityStage.PROPUESTA || opp.stage === OpportunityStage.NEGOCIACION || opp.quotation) && (
-                                                <button
-                                                    onClick={(e) => { handleOpenQuotation(opp); }}
-                                                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-colors ${opp.quotation
-                                                        ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
-                                                        : 'bg-brand-600 text-white hover:bg-brand-700 shadow-sm'
-                                                        }`}
-                                                >
-                                                    <FileText size={12} />
-                                                    {opp.quotation ? 'Editar Cotización' : 'Cotizar'}
-                                                </button>
-                                            )}
+                                        {/* Main Content */}
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 line-clamp-2 text-sm leading-snug mb-1 font-lato group-hover:text-brand-700 transition-colors">{opp.name}</h4>
+                                            <p className="text-xs text-slate-500 truncate flex items-center gap-1.5">
+                                                <Building size={12} className="text-slate-400" />
+                                                {opp.clientName}
+                                            </p>
+                                        </div>
+
+                                        {/* Footer Row */}
+                                        <div className="flex items-end justify-between pt-2 border-t border-slate-50 mt-1">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Valor</span>
+                                                <span className="text-base font-bold text-slate-800 font-lato">Q{opp.amount.toLocaleString(undefined, { compactDisplay: 'short' })}</span>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                {/* Probability Badge */}
+                                                <div className={`flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold ${opp.probability >= 80 ? 'bg-green-100 text-green-700' :
+                                                        opp.probability >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                                                            'bg-slate-100 text-slate-600'
+                                                    }`}>
+                                                    {opp.probability}%
+                                                </div>
+
+                                                {/* Responsible Avatar */}
+                                                <div className="relative group/avatar">
+                                                    <img
+                                                        src={getResponsibleAvatar(opp.responsibleId) || `https://ui-avatars.com/api/?name=User`}
+                                                        alt="User"
+                                                        className="w-7 h-7 rounded-full ring-2 ring-white shadow-sm object-cover"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Quick Actions Overlay (Visible on Hover) */}
+                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                             <button
-                                                onClick={() => openEditModal(opp)}
-                                                className="px-2 py-1.5 bg-slate-50 text-slate-500 hover:text-slate-800 rounded-lg border border-slate-100 hover:bg-slate-100 transition-colors"
-                                                title="Editar Detalle"
+                                                onClick={(e) => { e.stopPropagation(); openEditModal(opp); }}
+                                                className="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-brand-600 hover:bg-brand-50"
                                             >
                                                 <Edit size={12} />
                                             </button>
+                                            {(opp.stage === OpportunityStage.SOLICITUD || opp.stage === OpportunityStage.PROPUESTA || opp.stage === OpportunityStage.NEGOCIACION || opp.quotation) && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleOpenQuotation(opp); }}
+                                                    className="p-1.5 rounded-lg bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-brand-600 hover:bg-brand-50"
+                                                >
+                                                    <FileText size={12} />
+                                                </button>
+                                            )}
                                         </div>
-
                                     </div>
                                 ))}
                             </div>
