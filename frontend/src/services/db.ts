@@ -304,33 +304,48 @@ export const db = {
             if (!data.inventoryItems) { data.inventoryItems = initialData.inventoryItems; changed = true; }
             if (!data.documents) { data.documents = []; changed = true; }
 
+            // Cleanup: Permanently delete tasks older than 30 days
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime();
+            if (data.tasks) {
+                const originalLength = data.tasks.length;
+                data.tasks = data.tasks.filter((t: any) => {
+                    if (t.status === 'Eliminada' && t.deletedAt) {
+                        const deletedTime = new Date(t.deletedAt).getTime();
+                        return deletedTime > thirtyDaysAgo;
+                    }
+                    return true;
+                });
+                if (data.tasks.length !== originalLength) {
+                    changed = true;
+                    console.log('Cleanup: Permanently deleted old tasks from trash.');
+                }
+            }
+
             if (changed) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             }
         }
-
-        // Cleanup: Permanently delete tasks older than 30 days
-        const currentData = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
-        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime();
-        let cleanupNeeded = false;
-
-        if (currentData.tasks) {
-            const originalLength = currentData.tasks.length;
-            currentData.tasks = currentData.tasks.filter((t: any) => {
-                if (t.status === 'Eliminada' && t.deletedAt) {
-                    const deletedTime = new Date(t.deletedAt).getTime();
-                    return deletedTime > thirtyDaysAgo;
-                }
-                return true;
-            });
-            if (currentData.tasks.length !== originalLength) cleanupNeeded = true;
-        }
-
-        if (cleanupNeeded) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
-            console.log('Cleanup: Permanently deleted old tasks from trash.');
-        }
     },
+
+    // Suppliers
+    getSuppliers: (): Supplier[] => {
+        return db.getData().suppliers || [];
+    },
+    saveSupplier: (supplier: Supplier) => {
+        const data = db.getData();
+        if (!data.suppliers) data.suppliers = [];
+        const index = data.suppliers.findIndex(s => s.id === supplier.id);
+        if (index > -1) {
+            data.suppliers[index] = supplier;
+        } else {
+            data.suppliers.push(supplier);
+        }
+        db.saveData(data);
+    },
+
+    // Cleanup: Permanently delete tasks older than 30 days
+
+
     getData: (): DB => {
         const data = localStorage.getItem(STORAGE_KEY);
         return data ? JSON.parse(data) : initialData;
@@ -458,6 +473,144 @@ export const db = {
         return orgData.filter(t => t.assignedTo === userId || t.requesterId === userId);
     },
 
+    // Expenses
+    getExpenses: (): Expense[] => {
+        const data = db.getData();
+        return (data.expenses || []).filter(e => !e.organizationId || e.organizationId === 'org1');
+    },
+    addExpense: (expense: Expense) => {
+        const data = db.getData();
+        if (!data.expenses) data.expenses = [];
+        data.expenses.push(expense);
+        db.saveData(data);
+    },
+
+    // Purchases
+    getPurchases: (): Purchase[] => {
+        const data = db.getData();
+        return (data.purchases || []).filter(p => !p.organizationId || p.organizationId === 'org1');
+    },
+    addPurchase: (purchase: Purchase) => {
+        const data = db.getData();
+        if (!data.purchases) data.purchases = [];
+        data.purchases.push(purchase);
+        db.saveData(data);
+    },
+    registerPurchasePayment: (purchaseId: string, payment: PurchasePayment) => {
+        const data = db.getData();
+        if (data.purchases) {
+            const index = data.purchases.findIndex(p => p.id === purchaseId);
+            if (index > -1) {
+                const purchase = data.purchases[index];
+                if (!purchase.payments) purchase.payments = [];
+                purchase.payments.push(payment);
+                // Update balance
+                purchase.balance = Math.max(0, (purchase.balance || 0) - payment.amount);
+                if (purchase.balance <= 0) {
+                    purchase.paymentStatus = 'Pagado';
+                } else {
+                    purchase.paymentStatus = 'Parcial';
+                }
+                db.saveData(data);
+            }
+        }
+    },
+
+    // Projects
+    getProjects: (): Project[] => {
+        const data = db.getData();
+        return (data.projects || []).filter(p => !p.organizationId || p.organizationId === 'org1');
+    },
+    saveProject: (project: Project) => {
+        const data = db.getData();
+        if (!data.projects) data.projects = [];
+        const index = data.projects.findIndex(p => p.id === project.id);
+        if (index > -1) {
+            data.projects[index] = project;
+        } else {
+            data.projects.push(project);
+        }
+        db.saveData(data);
+    },
+    deleteProject: (id: string) => {
+        const data = db.getData();
+        if (data.projects) {
+            data.projects = data.projects.filter(p => p.id !== id);
+            db.saveData(data);
+        }
+    },
+
+    // Employees
+    getEmployees: (): Employee[] => {
+        const data = db.getData();
+        return (data.employees || []).filter(e => !e.organizationId || e.organizationId === 'org1');
+    },
+    saveEmployee: (employee: Employee) => {
+        const data = db.getData();
+        if (!data.employees) data.employees = [];
+        const index = data.employees.findIndex(e => e.id === employee.id);
+        if (index > -1) {
+            data.employees[index] = employee;
+        } else {
+            data.employees.push(employee);
+        }
+        db.saveData(data);
+    },
+    deleteEmployee: (id: string) => {
+        const data = db.getData();
+        if (data.employees) {
+            data.employees = data.employees.filter(e => e.id !== id);
+            db.saveData(data);
+        }
+    },
+
+    // Subscriptions
+    getSubscriptions: (): Subscription[] => {
+        const data = db.getData();
+        return (data.subscriptions || []).filter(s => !s.organizationId || s.organizationId === 'org1');
+    },
+    addSubscription: (sub: Subscription) => {
+        const data = db.getData();
+        if (!data.subscriptions) data.subscriptions = [];
+        data.subscriptions.push(sub);
+        db.saveData(data);
+    },
+    updateSubscription: (sub: Subscription) => {
+        const data = db.getData();
+        const index = data.subscriptions.findIndex(s => s.id === sub.id);
+        if (index > -1) {
+            data.subscriptions[index] = sub;
+            db.saveData(data);
+        }
+    },
+
+
+
+    // Activities
+    getAllActivities: (userId?: string, role?: UserRole): Activity[] => {
+        const data = db.getData();
+        const orgId = 'org1';
+        const orgActivities = data.activities ? data.activities.filter((a: any) => !a.organizationId || a.organizationId === orgId) : [];
+
+        if (role === UserRole.ADMIN) return orgActivities;
+
+        return orgActivities.filter(a => a.responsibleId === userId);
+    },
+    addActivity: (activity: Activity) => {
+        const data = db.getData();
+        if (!data.activities) data.activities = [];
+        data.activities.push(activity);
+        db.saveData(data);
+    },
+
+    // Clients Bulk
+    bulkAddClients: (clients: Client[]) => {
+        const data = db.getData();
+        if (!data.clients) data.clients = [];
+        data.clients.push(...clients);
+        db.saveData(data);
+    },
+
     // ... stats ...
     getStats: (userId?: string, role?: UserRole) => {
         // Reuse the logic from getOpportunities to respect permissions
@@ -502,16 +655,7 @@ export const db = {
     // ... (keep existing)
 
     // Opportunities
-    getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
-        const data = db.getData();
-        if (role === 'ADMIN') {
-            return data.opportunities;
-        }
-        if (userId) {
-            return data.opportunities.filter(o => o.responsibleId === userId);
-        }
-        return [];
-    },
+
     addOpportunity: (opp: Opportunity) => {
         const data = db.getData();
         data.opportunities.push(opp);
@@ -574,31 +718,19 @@ export const db = {
             db.saveData(data);
         }
     },
+
     getActivities: (opportunityId: string): Activity[] => {
         const data = db.getData();
         return data.activities
             .filter(a => a.opportunityId === opportunityId)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
-    addActivity: (activity: Activity) => {
-        const data = db.getData();
-        data.activities.push(activity);
 
-        // Update opportunity last interaction
-        const oppIndex = data.opportunities.findIndex(o => o.id === activity.opportunityId);
-        if (oppIndex > -1) {
-            data.opportunities[oppIndex].lastUpdated = new Date().toISOString();
-        }
-
-        db.saveData(data);
-    },
 
     // ...
 
     // Tasks / Tickets
-    getTasks: (userId?: string, role?: UserRole): Task[] => {
-        return db.getData().tasks; // Global Visibility
-    },
+
     addTask: (task: Task) => {
         const data = db.getData();
         data.tasks.push(task);
@@ -654,101 +786,13 @@ export const db = {
         }
     },
 
-    // Purchases & Payments
-    getPurchases: (): Purchase[] => {
-        return db.getData().purchases || [];
-    },
-    addPurchase: (purchase: Purchase) => {
-        const data = db.getData();
-        if (!data.purchases) data.purchases = [];
-        data.purchases.push(purchase);
-        db.saveData(data);
-    },
-    registerPurchasePayment: (purchaseId: string, payment: PurchasePayment) => {
-        const data = db.getData();
-        const index = data.purchases.findIndex(p => p.id === purchaseId);
-        if (index > -1) {
-            const purchase = data.purchases[index];
 
-            // Initialize arrays if old data
-            if (!purchase.payments) purchase.payments = [];
-
-            purchase.payments.push(payment);
-
-            const totalPaid = purchase.payments.reduce((sum, p) => sum + p.amount, 0);
-            purchase.balance = Math.max(0, purchase.amount - totalPaid);
-
-            if (purchase.balance <= 0.01) {
-                purchase.paymentStatus = 'Pagado';
-                purchase.balance = 0;
-            } else {
-                purchase.paymentStatus = 'Parcial';
-            }
-
-            db.saveData(data);
-        }
-    },
-
-    // Expenses
-    getExpenses: (): Expense[] => {
-        return db.getData().expenses || [];
-    },
-    addExpense: (expense: Expense) => {
-        const data = db.getData();
-        if (!data.expenses) data.expenses = [];
-        data.expenses.push(expense);
-        db.saveData(data);
-    },
-
-    // Employees (HR)
-    getEmployees: (): Employee[] => {
-        return db.getData().employees || [];
-    },
-    saveEmployee: (emp: Employee) => {
-        const data = db.getData();
-        if (!data.employees) data.employees = [];
-        const index = data.employees.findIndex(e => e.id === emp.id);
-        if (index > -1) {
-            data.employees[index] = emp;
-        } else {
-            data.employees.push(emp);
-        }
-        db.saveData(data);
-    },
-    deleteEmployee: (id: string) => {
-        const data = db.getData();
-        if (!data.employees) return;
-        const index = data.employees.findIndex(e => e.id === id);
-        if (index > -1) {
-            data.employees[index].active = false;
-            db.saveData(data);
-        }
-    },
-
-    // Subscriptions
-    getSubscriptions: (): Subscription[] => {
-        return db.getData().subscriptions || [];
-    },
-    addSubscription: (sub: Subscription) => {
-        const data = db.getData();
-        if (!data.subscriptions) data.subscriptions = [];
-        data.subscriptions.push(sub);
-        db.saveData(data);
-    },
-    updateSubscription: (sub: Subscription) => {
-        const data = db.getData();
-        if (!data.subscriptions) data.subscriptions = [];
-        const index = data.subscriptions.findIndex(s => s.id === sub.id);
-        if (index > -1) {
-            data.subscriptions[index] = sub;
-            db.saveData(data);
-        }
-    },
 
     // Sales Goals
     getSalesGoals: (month: number, year: number): SalesGoal[] => {
         const data = db.getData();
-        return (data.salesGoals || []).filter(g => g.month === month && g.year === year);
+        const orgId = 'org1';
+        return (data.salesGoals || []).filter(g => (!g.organizationId || g.organizationId === orgId) && g.month === month && g.year === year);
     },
     saveSalesGoal: (goal: SalesGoal) => {
         const data = db.getData();
@@ -762,27 +806,7 @@ export const db = {
         db.saveData(data);
     },
 
-    // Projects
-    getProjects: (): Project[] => {
-        return db.getData().projects || [];
-    },
-    saveProject: (project: Project) => {
-        const data = db.getData();
-        if (!data.projects) data.projects = [];
-        const index = data.projects.findIndex(p => p.id === project.id);
-        if (index > -1) {
-            data.projects[index] = project;
-        } else {
-            data.projects.push(project);
-        }
-        db.saveData(data);
-    },
-    deleteProject: (id: string) => {
-        const data = db.getData();
-        if (!data.projects) return;
-        data.projects = data.projects.filter(p => p.id !== id);
-        db.saveData(data);
-    },
+
 
     // Products
     getProducts: (): Product[] => {
@@ -876,10 +900,7 @@ export const db = {
     },
 
     // Notifications & Logic
-    getNotifications: (userId: string): Notification[] => {
-        const data = db.getData();
-        return data.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    },
+
     addNotification: (notification: Notification) => {
         const data = db.getData();
         data.notifications.push(notification);
@@ -893,15 +914,7 @@ export const db = {
             db.saveData(data);
         }
     },
-    hasSentDailyMotivation: (userId: string): boolean => {
-        const data = db.getData();
-        const today = new Date().toDateString();
-        return data.notifications.some(n =>
-            n.userId === userId &&
-            n.type === 'motivation' &&
-            new Date(n.date).toDateString() === today
-        );
-    },
+
     checkUserDailyActivity: (userId: string): boolean => {
         const data = db.getData();
         const today = new Date().toDateString();
@@ -934,20 +947,7 @@ export const db = {
         alert(`✅ [EMAIL ENVIADO]\n\nPara: ${to}\nAsunto: ${subject}\n\n${body.substring(0, 150)}...`);
     },
 
-    getStats: (userId?: string, role?: UserRole) => {
-        const opps = db.getOpportunities(userId, role);
-        const activeOpps = opps.filter(o => o.status !== 'deleted' && o.stage !== OpportunityStage.GANADA && o.stage !== OpportunityStage.PERDIDA);
-        const wonOpps = opps.filter(o => o.status !== 'deleted' && o.stage === OpportunityStage.GANADA);
-        const deletedOpps = opps.filter(o => o.status === 'deleted');
 
-        return {
-            totalActive: activeOpps.length,
-            totalWon: wonOpps.length,
-            amountPipeline: activeOpps.reduce((sum, o) => sum + o.amount, 0),
-            amountWon: wonOpps.reduce((sum, o) => sum + o.amount, 0),
-            totalDeleted: deletedOpps.length
-        };
-    }
 };
 
 db.init();

@@ -68,6 +68,24 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         status: 'active'
     });
 
+    const stages = Object.values(OpportunityStage);
+
+    const isStagnant = (opp: Opportunity) => {
+        if (!opp.lastUpdated) return false;
+        const diffTime = Math.abs(new Date().getTime() - new Date(opp.lastUpdated).getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 30;
+    };
+
+    const onDragStart = (e: React.DragEvent, oppId: string) => {
+        e.dataTransfer.setData("oppId", oppId);
+        setIsDragging(true);
+    };
+
+    const onDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+    };
+
     const refreshData = async () => {
         try {
             // Fetch Deals from Backend

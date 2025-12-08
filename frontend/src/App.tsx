@@ -198,6 +198,7 @@ function App() {
                 if (!hasActivity) {
                     db.addNotification({
                         id: `notif-${Date.now()}`,
+                        organizationId: user.organizationId || 'org1',
                         userId: user.id,
                         title: 'Ánimo, mañana será mejor',
                         message: 'Hoy no generaste ninguna oportunidad, animo tu eres increible, mañana tendras exito',

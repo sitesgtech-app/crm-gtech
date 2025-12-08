@@ -34,6 +34,7 @@ export const Services: React.FC<{ user: User }> = ({ user }) => {
 
     const service: Service = {
       id: currentService.id || `s${Date.now()}`,
+      organizationId: user.organizationId || 'org1',
       name: currentService.name,
       description: currentService.description || '',
       minProfit: Number(currentService.minProfit),

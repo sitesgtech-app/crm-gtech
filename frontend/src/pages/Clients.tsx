@@ -99,6 +99,7 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
 
     const client: Client = {
       id: newClient.id || `c${Date.now()}`,
+      organizationId: user.organizationId || 'org1',
       name: newClient.name || '',
       company: newClient.company || '',
       email: newClient.email || '',

@@ -91,6 +91,7 @@ export const SalesGoals: React.FC<SalesGoalsProps> = ({ user }) => {
         } else {
             setEditingGoal({
                 id: `g-${userId}-${selectedMonth}-${selectedYear}`,
+                organizationId: user.organizationId || 'org1',
                 userId,
                 month: selectedMonth,
                 year: selectedYear,
