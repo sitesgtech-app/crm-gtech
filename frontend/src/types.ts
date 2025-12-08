@@ -161,7 +161,7 @@ export interface Activity {
   organizationId: string; // New
   opportunityId: string; // Mandatory now for specific tracking
   clientId: string;
-  type: 'Llamada' | 'WhatsApp' | 'Correo' | 'Reunión' | 'Visita Técnica' | 'Visita en Frío';
+  type: 'Llamada' | 'WhatsApp' | 'Correo' | 'Reunión' | 'Visita Técnica' | 'Visita en Frío' | 'Sistema';
   date: string;
   description: string;
   responsibleId: string;

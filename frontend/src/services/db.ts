@@ -511,6 +511,7 @@ export const db = {
         // Add activity log
         data.activities.push({
             id: `act${Date.now()}`,
+            organizationId: 'org1',
             opportunityId: opp.id,
             clientId: opp.clientId,
             type: 'Sistema',
@@ -553,6 +554,7 @@ export const db = {
             // Log activity
             data.activities.push({
                 id: `act${Date.now()}`,
+                organizationId: 'org1',
                 opportunityId: id,
                 clientId: data.opportunities[index].clientId,
                 type: 'Sistema',
@@ -598,6 +600,7 @@ export const db = {
         if (task.assignedTo) {
             db.addNotification({
                 id: Date.now().toString(),
+                organizationId: 'org1',
                 userId: task.assignedTo,
                 title: 'Nueva Tarea Asignada',
                 message: `Se te ha asignado la tarea: ${task.title}`,
@@ -629,6 +632,7 @@ export const db = {
             if (task.assignedTo && task.assignedTo !== oldTask.assignedTo) {
                 db.addNotification({
                     id: Date.now().toString(),
+                    organizationId: 'org1',
                     userId: task.assignedTo,
                     title: 'Tarea Reasignada',
                     message: `Se te ha reasignado la tarea: ${task.title}`,
