@@ -34,6 +34,7 @@ model Client {
   phone     String?
   company   String?
   address   String?
+  nit       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   organizationId String @default("org1")

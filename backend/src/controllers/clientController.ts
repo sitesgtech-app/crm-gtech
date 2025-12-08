@@ -8,6 +8,7 @@ const clientSchema = z.object({
     phone: z.string().optional(),
     company: z.string().optional(),
     address: z.string().optional(),
+    nit: z.string().optional(),
 });
 
 interface AuthRequest extends Request {

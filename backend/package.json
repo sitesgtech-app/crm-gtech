@@ -4,7 +4,7 @@
   "description": "Backend for GTECH CRM",
   "main": "dist/index.js",
   "scripts": {
-    "start": "npx prisma migrate deploy && node dist/index.js",
+    "start": "npx prisma db push && node dist/index.js",
     "start:prod": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
