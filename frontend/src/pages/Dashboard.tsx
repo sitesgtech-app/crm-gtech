@@ -19,10 +19,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       try {
         // Fetch real data
         const dealsRes = await api.get('/deals');
+        // Mapping Stages Backend (English ENUM) -> Frontend (Spanish)
+        const mapBackendStageToFrontend = (backendStage: string) => {
+          switch (backendStage) {
+            case 'CONTACTED': return OpportunityStage.CONTACTADO;
+            case 'LEAD': return OpportunityStage.SOLICITUD;
+            case 'PROPOSAL': return OpportunityStage.PROPUESTA;
+            case 'NEGOTIATION': return OpportunityStage.NEGOCIACION;
+            case 'CLOSED_WON': return OpportunityStage.GANADA;
+            case 'CLOSED_LOST': return OpportunityStage.PERDIDA;
+            default: return OpportunityStage.SOLICITUD;
+          }
+        };
+
         const deals = dealsRes.data.map((d: any) => ({
           ...d,
           amount: d.value || 0,
-          name: d.title
+          name: d.title,
+          stage: mapBackendStageToFrontend(d.stage)
         }));
         setOpportunities(deals);
 
