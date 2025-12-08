@@ -9,6 +9,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  organizationId: string; // New: Tenant Isolation
   avatar?: string;
   phone?: string;
   password?: string; // New field for authentication
@@ -47,6 +48,7 @@ export interface Organization {
 export interface Notification {
   id: string;
   userId: string;
+  organizationId: string; // New
   title: string;
   message: string;
   date: string; // ISO String
@@ -56,6 +58,7 @@ export interface Notification {
 
 export interface Client {
   id: string;
+  organizationId: string; // New
   name: string;
   company: string;
   phone: string;
@@ -74,6 +77,7 @@ export interface Client {
 
 export interface Supplier {
   id: string;
+  organizationId: string; // New
   name: string; // Nombre Empresa Proveedora
   contactName: string; // Asesor Asignado (Contacto en el proveedor)
   phone: string;
@@ -118,6 +122,7 @@ export interface Quotation {
 
 export interface Opportunity {
   id: string;
+  organizationId: string; // New
   clientId: string;
   clientName: string; // Denormalized for easier display
   name: string;
@@ -153,6 +158,7 @@ export interface Opportunity {
 
 export interface Activity {
   id: string;
+  organizationId: string; // New
   opportunityId: string; // Mandatory now for specific tracking
   clientId: string;
   type: 'Llamada' | 'WhatsApp' | 'Correo' | 'Reunión' | 'Visita Técnica' | 'Visita en Frío';
@@ -172,6 +178,7 @@ export interface DashboardStats {
 
 export interface Service {
   id: string;
+  organizationId: string; // New
   name: string;
   description: string;
   minProfit: number; // Renamed from price to reflect Minimum Profit
@@ -180,6 +187,7 @@ export interface Service {
 
 export interface Product {
   id: string;
+  organizationId: string; // New
   name: string;
   sku: string;
   description: string;
@@ -193,6 +201,7 @@ export type InventoryCategory = 'Insumos' | 'Equipo de Oficina' | 'Herramientas'
 
 export interface InventoryItem {
   id: string;
+  organizationId: string; // New
   name: string;
   category: InventoryCategory;
   description: string;
@@ -206,6 +215,7 @@ export interface InventoryItem {
 
 export interface GuatecomprasEvent {
   id: string;
+  organizationId: string; // New
   nog: string;
   awardedAmount: number;
   profit: number;
@@ -233,6 +243,7 @@ export enum TaskPriority {
 
 export interface Task {
   id: string;
+  organizationId: string; // New
   title: string; // Short title
   description: string;
   assignedTo: string; // User ID
@@ -258,6 +269,7 @@ export interface PurchasePayment {
 
 export interface Purchase {
   id: string;
+  organizationId: string; // New
   date: string;
   supplier: string; // Stores supplier Name for history consistency
   supplierId?: string; // Optional link to Supplier entity
@@ -284,6 +296,7 @@ export interface Purchase {
 
 export interface Expense {
   id: string;
+  organizationId: string; // New
   date: string;
   category: string;
   supplier?: string; // Stores supplier Name
@@ -301,6 +314,7 @@ export interface Expense {
 
 export interface Subscription {
   id: string;
+  organizationId: string; // New
   name: string;
   provider: string;
   amount: number;
@@ -311,6 +325,7 @@ export interface Subscription {
 
 export interface SalesGoal {
   id: string;
+  organizationId: string; // New
   userId: string;
   month: number; // 0-11
   year: number;
@@ -343,6 +358,7 @@ export enum ProjectStatus {
 
 export interface Project {
   id: string;
+  organizationId: string; // New
   name: string;
   clientId: string;
   opportunityId?: string; // LINK TO WON OPPORTUNITY
@@ -364,6 +380,7 @@ export type ContractType = 'Planilla' | 'Servicios Profesionales';
 
 export interface Employee {
   id: string;
+  organizationId: string; // New
   name: string;
   position: string;
   contractType: ContractType;
@@ -377,6 +394,7 @@ export interface Employee {
 // --- DOCUMENTS ---
 export interface CompanyDocument {
   id: string;
+  organizationId: string; // New
   title: string;
   category: 'Políticas' | 'Legal' | 'RRHH' | 'Fiscal' | 'Otro';
   fileName: string;
@@ -388,6 +406,7 @@ export interface CompanyDocument {
 // --- ISSUED INVOICES (FACTURAS EMITIDAS) ---
 export interface IssuedInvoice {
   id: string;
+  organizationId: string; // New
   number: string; // Numero de DTE/Factura
   date: string;
   clientName: string;

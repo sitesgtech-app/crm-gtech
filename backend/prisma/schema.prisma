@@ -21,6 +21,7 @@ model User {
   resetTokenExpiry DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  organizationId String @default("org1")
 
   ticketsAssigned Ticket[]
   deals           Deal[]
@@ -35,6 +36,7 @@ model Client {
   address   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  organizationId String @default("org1")
 
   tickets Ticket[]
   deals   Deal[]
@@ -48,6 +50,7 @@ model Ticket {
   priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  organizationId String @default("org1")
 
   clientId String
   client   Client @relation(fields: [clientId], references: [id])
@@ -68,6 +71,7 @@ model Deal {
   expectedCloseDate DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  organizationId String @default("org1")
 
   clientId String
   client   Client @relation(fields: [clientId], references: [id])
@@ -85,4 +89,5 @@ model Product {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  organizationId String @default("org1")
 }

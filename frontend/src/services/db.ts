@@ -51,6 +51,7 @@ const initialData: DB = {
     users: [
         {
             id: 'u1',
+            organizationId: 'org1',
             name: 'Erick Admin',
             email: 'erick@gtechguate.com',
             password: 'RivGonzalo24**',
@@ -59,10 +60,11 @@ const initialData: DB = {
             phone: '5555-0001',
             active: true,
             permissions: [],
-            mustChangePassword: false // Admin default set
+            mustChangePassword: false
         },
         {
             id: 'u2',
+            organizationId: 'org1',
             name: 'Ana Vendedora',
             email: 'ana@gtech.com',
             password: '123',
@@ -75,57 +77,58 @@ const initialData: DB = {
         },
     ],
     clients: [
-        { id: 'c1', name: 'Juan Pérez', company: 'Tech Solutions', phone: '555-0101', email: 'juan@tech.com', address: 'Zona 10, Guatemala', createdAt: new Date().toISOString(), tags: ['VIP', 'Software'], responsibleId: 'u1', nit: '123456-7', industry: 'Tecnología', companyPhone: '2222-0001', assignedAdvisor: 'u1', sector: 'Privado' },
-        { id: 'c2', name: 'María López', company: 'Importadora S.A.', phone: '555-0102', email: 'maria@import.com', address: 'Zona 4, Guatemala', createdAt: new Date().toISOString(), tags: ['Retail'], responsibleId: 'u2', nit: '987654-3', industry: 'Retail', companyPhone: '2222-0002', assignedAdvisor: 'u2', sector: 'Privado' },
-        { id: 'c3', name: 'Lic. Sonia Martínez', company: 'Ministerio de Educación', phone: '555-0103', email: 'compras@mineduc.gob.gt', address: 'Zona 1, Guatemala', createdAt: new Date().toISOString(), tags: ['Gobierno'], responsibleId: 'u2', nit: '11111-K', industry: 'Gobierno', companyPhone: '2222-5555', assignedAdvisor: 'u2', sector: 'Gubernamental' },
+        { id: 'c1', organizationId: 'org1', name: 'Juan Pérez', company: 'Tech Solutions', phone: '555-0101', email: 'juan@tech.com', address: 'Zona 10, Guatemala', createdAt: new Date().toISOString(), tags: ['VIP', 'Software'], responsibleId: 'u1', nit: '123456-7', industry: 'Tecnología', companyPhone: '2222-0001', assignedAdvisor: 'u1', sector: 'Privado' },
+        { id: 'c2', organizationId: 'org1', name: 'María López', company: 'Importadora S.A.', phone: '555-0102', email: 'maria@import.com', address: 'Zona 4, Guatemala', createdAt: new Date().toISOString(), tags: ['Retail'], responsibleId: 'u2', nit: '987654-3', industry: 'Retail', companyPhone: '2222-0002', assignedAdvisor: 'u2', sector: 'Privado' },
+        { id: 'c3', organizationId: 'org1', name: 'Lic. Sonia Martínez', company: 'Ministerio de Educación', phone: '555-0103', email: 'compras@mineduc.gob.gt', address: 'Zona 1, Guatemala', createdAt: new Date().toISOString(), tags: ['Gobierno'], responsibleId: 'u2', nit: '11111-K', industry: 'Gobierno', companyPhone: '2222-5555', assignedAdvisor: 'u2', sector: 'Gubernamental' },
     ],
     suppliers: [
-        { id: 'sup1', name: 'Intelaf', contactName: 'Pedro Ventas', email: 'ventas@intelaf.com', phone: '2323-0000', address: 'Zona 9', createdAt: new Date().toISOString() },
-        { id: 'sup2', name: 'Max Distribuidores', contactName: 'Luisa Mayorista', email: 'luisa@max.com', phone: '2222-1111', address: 'Zona 10', createdAt: new Date().toISOString() }
+        { id: 'sup1', organizationId: 'org1', name: 'Intelaf', contactName: 'Pedro Ventas', email: 'ventas@intelaf.com', phone: '2323-0000', address: 'Zona 9', createdAt: new Date().toISOString() },
+        { id: 'sup2', organizationId: 'org1', name: 'Max Distribuidores', contactName: 'Luisa Mayorista', email: 'luisa@max.com', phone: '2222-1111', address: 'Zona 10', createdAt: new Date().toISOString() }
     ],
     opportunities: [
         {
-            id: 'o1', clientId: 'c1', clientName: 'Tech Solutions', name: 'Licencia Enterprise', description: 'Renovación anual',
+            id: 'o1', organizationId: 'org1', clientId: 'c1', clientName: 'Tech Solutions', name: 'Licencia Enterprise', description: 'Renovación anual',
             amount: 15000, createdAt: new Date(Date.now() - 86400000 * 20).toISOString(), lastUpdated: new Date().toISOString(), estimatedCloseDate: '2023-12-31', stage: OpportunityStage.NEGOCIACION,
             responsibleId: 'u1', probability: 90, notes: 'Cliente interesado en descuento por pronto pago', origin: 'Sitio Web', profitMargin: 25, sector: 'Privado', status: 'active'
         },
         {
-            id: 'o2', clientId: 'c2', clientName: 'Importadora S.A.', name: 'Implementación CRM', description: 'Servicio completo',
+            id: 'o2', organizationId: 'org1', clientId: 'c2', clientName: 'Importadora S.A.', name: 'Implementación CRM', description: 'Servicio completo',
             amount: 45000, createdAt: new Date().toISOString(), lastUpdated: new Date().toISOString(), estimatedCloseDate: '2024-01-15', stage: OpportunityStage.PROPUESTA,
             responsibleId: 'u2', probability: 60, notes: 'Enviada propuesta v2', origin: 'Referido', profitMargin: 30, sector: 'Privado', status: 'active'
         },
         {
-            id: 'o3', clientId: 'c3', clientName: 'Ministerio de Educación', name: 'Consultoría IT', description: 'Auditoría de seguridad',
+            id: 'o3', organizationId: 'org1', clientId: 'c3', clientName: 'Ministerio de Educación', name: 'Consultoría IT', description: 'Auditoría de seguridad',
             amount: 5000, createdAt: new Date(Date.now() - 86400000 * 16).toISOString(), lastUpdated: new Date().toISOString(), estimatedCloseDate: '2023-11-20', stage: OpportunityStage.CONTACTADO,
             responsibleId: 'u2', probability: 30, notes: 'Primer contacto realizado', origin: 'LinkedIn', profitMargin: 40, sector: 'Gubernamental', status: 'active'
         },
         {
-            id: 'o4', clientId: 'c2', clientName: 'Importadora S.A.', name: 'Equipos Hardware', description: 'Laptops nuevas',
+            id: 'o4', organizationId: 'org1', clientId: 'c2', clientName: 'Importadora S.A.', name: 'Equipos Hardware', description: 'Laptops nuevas',
             amount: 120000, createdAt: new Date().toISOString(), lastUpdated: new Date().toISOString(), estimatedCloseDate: '2023-10-10', stage: OpportunityStage.GANADA,
             responsibleId: 'u1', probability: 100, notes: 'Venta cerrada exitosamente', origin: 'Evento', profitMargin: 15, sector: 'Privado', status: 'active'
         }
     ],
     activities: [
-        { id: 'a1', opportunityId: 'o1', clientId: 'c1', type: 'Llamada', date: new Date().toISOString(), description: 'Seguimiento de propuesta', responsibleId: 'u1', responsibleName: 'Erick Admin' }
+        { id: 'a1', organizationId: 'org1', opportunityId: 'o1', clientId: 'c1', type: 'Llamada', date: new Date().toISOString(), description: 'Seguimiento de propuesta', responsibleId: 'u1', responsibleName: 'Erick Admin' }
     ],
     products: [
-        { id: 'p1', name: 'Licencia Software Base', sku: 'SW-001', description: 'Licencia anual por usuario', price: 1200, cost: 800, stock: 1000, active: true },
-        { id: 'p2', name: 'Servidor Rack 2U', sku: 'HW-SRV-02', description: 'Servidor físico de alta disponibilidad', price: 15000, cost: 11000, stock: 5, active: true }
+        { id: 'p1', organizationId: 'org1', name: 'Licencia Software Base', sku: 'SW-001', description: 'Licencia anual por usuario', price: 1200, cost: 800, stock: 1000, active: true },
+        { id: 'p2', organizationId: 'org1', name: 'Servidor Rack 2U', sku: 'HW-SRV-02', description: 'Servidor físico de alta disponibilidad', price: 15000, cost: 11000, stock: 5, active: true }
     ],
     services: [
-        { id: 's1', name: 'Implementación CRM', description: 'Configuración y capacitación', minProfit: 5000, active: true },
-        { id: 's2', name: 'Soporte Técnico Mensual', description: 'SLA 24/7', minProfit: 800, active: true }
+        { id: 's1', organizationId: 'org1', name: 'Implementación CRM', description: 'Configuración y capacitación', minProfit: 5000, active: true },
+        { id: 's2', organizationId: 'org1', name: 'Soporte Técnico Mensual', description: 'SLA 24/7', minProfit: 800, active: true }
     ],
     inventoryItems: [
-        { id: 'i1', name: 'Papel Bond Carta', category: 'Insumos', quantity: 20, description: 'Resmas de 500 hojas', location: 'Bodega 1', unitCost: 35 },
-        { id: 'i2', name: 'Laptop Dell Latitude (Uso Interno)', category: 'Equipo de Oficina', quantity: 3, description: 'Asignadas a Ventas', location: 'Oficina', purchaseDate: '2023-01-15', warranty: '3 años', unitCost: 8500 },
-        { id: 'i3', name: 'Kit de Destornilladores', category: 'Herramientas', quantity: 2, description: 'Para soporte técnico', location: 'Taller', unitCost: 250 }
+        { id: 'i1', organizationId: 'org1', name: 'Papel Bond Carta', category: 'Insumos', quantity: 20, description: 'Resmas de 500 hojas', location: 'Bodega 1', unitCost: 35 },
+        { id: 'i2', organizationId: 'org1', name: 'Laptop Dell Latitude (Uso Interno)', category: 'Equipo de Oficina', quantity: 3, description: 'Asignadas a Ventas', location: 'Oficina', purchaseDate: '2023-01-15', warranty: '3 años', unitCost: 8500 },
+        { id: 'i3', organizationId: 'org1', name: 'Kit de Destornilladores', category: 'Herramientas', quantity: 2, description: 'Para soporte técnico', location: 'Taller', unitCost: 250 }
     ],
     notifications: [],
     guatecomprasEvents: [],
     tasks: [
         {
             id: 't1',
+            organizationId: 'org1',
             title: 'Cotización Ministerio Salud',
             description: 'Preparar licitación completa incluyendo fianzas.',
             assignedTo: 'u2',
@@ -138,6 +141,7 @@ const initialData: DB = {
         },
         {
             id: 't2',
+            organizationId: 'org1',
             title: 'Mantenimiento Impresoras',
             description: 'Coordinar con técnico externo revisión de impresoras de contabilidad.',
             assignedTo: 'u1',
@@ -154,6 +158,7 @@ const initialData: DB = {
     salesGoals: [
         {
             id: 'g1',
+            organizationId: 'org1',
             userId: 'u1',
             month: new Date().getMonth(),
             year: new Date().getFullYear(),
@@ -166,6 +171,7 @@ const initialData: DB = {
         },
         {
             id: 'g2',
+            organizationId: 'org1',
             userId: 'u2',
             month: new Date().getMonth(),
             year: new Date().getFullYear(),
@@ -180,6 +186,7 @@ const initialData: DB = {
     projects: [
         {
             id: 'pj1',
+            organizationId: 'org1',
             name: 'Cableado Estructurado Oficinas Zona 14',
             clientId: 'c1',
             status: ProjectStatus.PLANIFICACION,
@@ -201,6 +208,7 @@ const initialData: DB = {
     employees: [
         {
             id: 'emp1',
+            organizationId: 'org1',
             name: 'Juan Contador',
             position: 'Contador General',
             contractType: 'Planilla',
@@ -212,6 +220,7 @@ const initialData: DB = {
         },
         {
             id: 'emp2',
+            organizationId: 'org1',
             name: 'Pedro Mensajero',
             position: 'Mensajería',
             contractType: 'Servicios Profesionales',
@@ -243,8 +252,22 @@ export const db = {
                         u.mustChangePassword = false;
                         changed = true;
                     }
+                    if (!u.organizationId) { u.organizationId = 'org1'; changed = true; }
                 });
             }
+            // Organization Isolation Migration
+            const entities = ['clients', 'suppliers', 'opportunities', 'activities', 'products', 'services', 'inventoryItems', 'notifications', 'guatecomprasEvents', 'tasks', 'purchases', 'expenses', 'subscriptions', 'salesGoals', 'projects', 'employees', 'documents', 'issuedInvoices'];
+
+            entities.forEach(entity => {
+                if (data[entity]) {
+                    data[entity].forEach((item: any) => {
+                        if (!item.organizationId) {
+                            item.organizationId = 'org1';
+                            changed = true;
+                        }
+                    });
+                }
+            });
 
             if (!data.organization) { data.organization = initialData.organization; changed = true; }
             if (data.organization && data.organization.initialBalance === undefined) {
@@ -401,8 +424,76 @@ export const db = {
 
     // Clients
     getClients: (userId?: string, role?: UserRole): Client[] => {
-        return db.getData().clients; // Global Visibility
+        const data = db.getData();
+        const orgId = 'org1';
+        const orgData = data.clients.filter(c => c.organizationId === orgId);
+
+        if (role === UserRole.ADMIN) return orgData;
+
+        // Users see clients they are responsible for
+        return orgData.filter(c => c.responsibleId === userId);
     },
+
+    // ... opportunities ...
+    getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
+        const data = db.getData();
+        const orgId = 'org1';
+        const orgData = data.opportunities.filter(o => o.organizationId === orgId);
+
+        if (role === UserRole.ADMIN) return orgData;
+
+        // Users see opportunities they are responsible for
+        return orgData.filter(o => o.responsibleId === userId);
+    },
+
+    // ... tasks ...
+    getTasks: (userId?: string, role?: UserRole): Task[] => {
+        const data = db.getData();
+        const orgId = 'org1';
+        const orgData = data.tasks.filter(t => t.organizationId === orgId);
+
+        if (role === UserRole.ADMIN) return orgData;
+
+        // Users see tasks assigned to them OR requested by them
+        return orgData.filter(t => t.assignedTo === userId || t.requesterId === userId);
+    },
+
+    // ... stats ...
+    getStats: (userId?: string, role?: UserRole) => {
+        // Reuse the logic from getOpportunities to respect permissions
+        const opps = db.getOpportunities(userId, role);
+        const activeOpps = opps.filter(o => o.status !== 'deleted' && o.stage !== OpportunityStage.GANADA && o.stage !== OpportunityStage.PERDIDA);
+        const wonOpps = opps.filter(o => o.status !== 'deleted' && o.stage === OpportunityStage.GANADA);
+        const deletedOpps = opps.filter(o => o.status === 'deleted');
+
+        return {
+            totalActive: activeOpps.length,
+            totalWon: wonOpps.length,
+            amountPipeline: activeOpps.reduce((sum, o) => sum + o.amount, 0),
+            amountWon: wonOpps.reduce((sum, o) => sum + o.amount, 0),
+            totalDeleted: deletedOpps.length
+        };
+    },
+
+    // ... notifications ...
+    getNotifications: (userId: string): Notification[] => {
+        const data = db.getData();
+        const orgId = 'org1'; // Enforce Org Isolation
+        return data.notifications
+            .filter(n => n.organizationId === orgId && n.userId === userId)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    },
+    hasSentDailyMotivation: (userId: string): boolean => {
+        const data = db.getData();
+        const today = new Date().toDateString();
+        const orgId = 'org1';
+        return data.notifications.some(n =>
+            n.organizationId === orgId &&
+            n.userId === userId &&
+            n.type === 'motivation' &&
+            new Date(n.date).toDateString() === today
+        );
+    }
     addClient: (client: Client) => {
         const data = db.getData();
         data.clients.push(client);
