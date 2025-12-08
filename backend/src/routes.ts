@@ -36,4 +36,7 @@ router.patch('/deals/:id/stage', dealController.updateDealStage);
 // Ticket Routes
 router.get('/tickets', ticketController.getTickets);
 router.post('/tickets', ticketController.createTicket);
+router.get('/tickets/trash', ticketController.getTrashedTickets);
 router.patch('/tickets/:id/status', ticketController.updateTicketStatus);
+router.post('/tickets/:id/restore', ticketController.restoreTicket);
+router.delete('/tickets/:id', ticketController.softDeleteTicket);

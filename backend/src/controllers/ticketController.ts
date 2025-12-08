@@ -8,11 +8,14 @@ const ticketSchema = z.object({
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
     clientId: z.string(),
     assignedToId: z.string().optional(),
+    department: z.string().optional(),
+    requesterId: z.string().optional(),
 });
 
 export const getTickets = async (req: Request, res: Response) => {
     try {
         const tickets = await prisma.ticket.findMany({
+            where: { deletedAt: null },
             include: { client: true, assignedTo: true },
             orderBy: { createdAt: 'desc' },
         });
@@ -43,5 +46,51 @@ export const updateTicketStatus = async (req: Request, res: Response) => {
         res.json(ticket);
     } catch (error) {
         res.status(400).json({ error: 'Failed to update ticket' });
+    }
+};
+
+export const softDeleteTicket = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        await prisma.ticket.update({
+            where: { id },
+            data: {
+                deletedAt: new Date(),
+                deletionReason: reason
+            },
+        });
+        res.json({ message: 'Ticket moved to trash' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete ticket' });
+    }
+};
+
+export const restoreTicket = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        await prisma.ticket.update({
+            where: { id },
+            data: {
+                deletedAt: null,
+                deletionReason: null
+            },
+        });
+        res.json({ message: 'Ticket restored' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to restore ticket' });
+    }
+};
+
+export const getTrashedTickets = async (req: Request, res: Response) => {
+    try {
+        const tickets = await prisma.ticket.findMany({
+            where: { NOT: { deletedAt: null } },
+            include: { client: true, assignedTo: true },
+            orderBy: { deletedAt: 'desc' },
+        });
+        res.json(tickets);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch trashed tickets' });
     }
 };

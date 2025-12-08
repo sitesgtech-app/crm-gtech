@@ -54,6 +54,9 @@ model Ticket {
 
   assignedToId String?
   assignedTo   User?   @relation(fields: [assignedToId], references: [id])
+
+  deletedAt      DateTime?
+  deletionReason String?
 }
 
 model Deal {

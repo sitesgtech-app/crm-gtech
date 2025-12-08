@@ -174,7 +174,7 @@ export interface Service {
   id: string;
   name: string;
   description: string;
-  price: number;
+  minProfit: number; // Renamed from price to reflect Minimum Profit
   active: boolean;
 }
 
@@ -220,7 +220,8 @@ export interface GuatecomprasEvent {
 export enum TaskStatus {
   RECIBIDA = 'Recibida',
   EN_PROCESO = 'En Proceso',
-  FINALIZADA = 'Finalizada'
+  FINALIZADA = 'Finalizada',
+  ELIMINADA = 'Eliminada'
 }
 
 export enum TaskPriority {
@@ -242,6 +243,8 @@ export interface Task {
   createdAt: string;
   startedAt?: string; // Timestamp when moved to En Proceso
   finishedAt?: string; // Timestamp when moved to Finalizada
+  deletionReason?: string; // Reason why ticket was deleted
+  deletedAt?: string; // Timestamp when ticket was deleted
 }
 
 // --- ACCOUNTS PAYABLE EXTENSIONS ---
