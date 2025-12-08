@@ -198,6 +198,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             }
             const newClient: Client = {
                 id: `c${Date.now()}`,
+                organizationId: user.organizationId || 'org1',
                 name: newClientData.name,
                 company: newClientData.company || newClientData.name,
                 nit: newClientData.nit,
@@ -255,6 +256,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         } else {
             const opp: Opportunity = {
                 id: `o${Date.now()}`,
+                organizationId: user.organizationId || 'org1',
                 clientId: clientIdToUse,
                 clientName: clientName,
                 name: newOpp.name || 'Nueva Oportunidad',
@@ -354,6 +356,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
         const activity: Activity = {
             id: `act${Date.now()}`,
+            organizationId: user.organizationId || 'org1',
             opportunityId: selectedOpp.id,
             clientId: selectedOpp.clientId,
             type: newActivity.type as any,
@@ -562,45 +565,62 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                             draggable
                                             onDragStart={(e) => onDragStart(e, opp.id)}
                                             onClick={() => setSelectedOpp(opp)}
-                                            className={`bg-white p-4 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-2 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
+                                            className={`bg-white p-3 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-1.5 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
                                         >
                                             {/* Top Row: Dot + Name */}
                                             <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-start gap-2">
-                                                    <div className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
-                                                    <div>
-                                                        <h4 className="font-bold text-slate-800 text-sm leading-tight font-lato group-hover:text-brand-700">{opp.name}</h4>
-                                                        <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
+                                                <div className="flex items-start gap-2 overflow-hidden">
+                                                    <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight font-lato group-hover:text-brand-700 truncate">{opp.name}</h4>
+                                                        <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
                                                             <Building size={10} />
-                                                            <span className="truncate max-w-[150px]">{opp.clientName}</span>
+                                                            <span className="truncate max-w-[120px]">{opp.clientName}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Sentiment / Probability Icon */}
-                                                {opp.probability >= 80 ? <div className="text-green-500"><TrendingUp size={16} /></div> :
-                                                    opp.probability <= 30 ? <div className="text-amber-400"><AlertCircle size={16} /></div> :
-                                                        <div className="text-slate-300"><PieChart size={16} /></div>
+                                                {opp.probability >= 80 ? <div className="text-green-500 shrink-0"><TrendingUp size={14} /></div> :
+                                                    opp.probability <= 30 ? <div className="text-amber-400 shrink-0"><AlertCircle size={14} /></div> :
+                                                        <div className="text-slate-300 shrink-0"><PieChart size={14} /></div>
                                                 }
                                             </div>
 
                                             {/* Middle Row: Amount & Details */}
-                                            <div className="flex items-center justify-start gap-3 mt-1 pl-4">
-                                                <p className="text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
-                                                <div className="h-3 w-px bg-slate-200"></div>
-                                                <div className="flex items-center gap-1 text-xs text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
-                                                    <Calculator size={10} />
-                                                    {opp.probability}%
+                                            <div className="flex items-center justify-between mt-1 pl-3">
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-xs md:text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
+                                                    <div className="h-3 w-px bg-slate-200"></div>
+                                                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                                                        <Calculator size={10} />
+                                                        {opp.probability}%
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* Stagnant Warning */}
-                                            {isStagnant(opp) && (
-                                                <div className="mt-2 text-[10px] text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1">
-                                                    <Clock size={10} />
-                                                    <span>Sin actividad reciente</span>
+                                            {/* Footer: Advisor & Stagnant Warning */}
+                                            <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 pl-1">
+                                                <div className="flex items-center gap-1.5">
+                                                    {getResponsibleAvatar(opp.responsibleId) ? (
+                                                        <img src={getResponsibleAvatar(opp.responsibleId) || ''} alt="Av" className="w-4 h-4 rounded-full" />
+                                                    ) : (
+                                                        <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                                                            {users.find(u => u.id === opp.responsibleId)?.name.charAt(0) || '?'}
+                                                        </div>
+                                                    )}
+                                                    <span className="text-[10px] text-slate-400 font-medium truncate max-w-[80px]">
+                                                        {users.find(u => u.id === opp.responsibleId)?.name || 'Sin Asignar'}
+                                                    </span>
                                                 </div>
-                                            )}
+
+                                                {isStagnant(opp) && (
+                                                    <div className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                        <Clock size={10} />
+                                                        <span>Inactivo</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
 
