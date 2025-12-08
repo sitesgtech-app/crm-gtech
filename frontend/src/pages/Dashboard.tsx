@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { DollarSign, Briefcase, CheckCircle, Clock, Trash2, TrendingUp, Users, Target, ListTodo, AlertCircle, Sparkles } from 'lucide-react';
 import { db } from '../services/db';
+import api from '../services/api';
 import { User, OpportunityStage, TaskStatus, TaskPriority } from '../types';
 
 interface DashboardProps {
@@ -10,11 +11,47 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
-  const stats = useMemo(() => db.getStats(user.id, user.role), [user]);
-  const opportunities = useMemo(() => db.getOpportunities(user.id, user.role).filter(o => o.status !== 'deleted'), [user]);
-  const tasks = useMemo(() => db.getTasks(user.id, user.role), [user]);
+  const [opportunities, setOpportunities] = React.useState<any[]>([]);
+  const [tasks, setTasks] = React.useState<any[]>([]);
 
-  const funnelData = useMemo(() => {
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch real data
+        const dealsRes = await api.get('/deals');
+        const deals = dealsRes.data.map((d: any) => ({
+          ...d,
+          amount: d.value || 0,
+          name: d.title
+        }));
+        setOpportunities(deals);
+
+        // Tasks/Tickets still mixed? db.getTasks is used below.
+        // Let's keep tasks local/db for now if no endpoint, or check routes. 
+        // Routes has /tickets. Let's try to fetch /tickets if possible?
+        // User specifically asked about "visualizar informacion de los demas", primarily deals/kanban.
+        // Let's safely default tasks to local for dashboard to avoid breakage if ticket structure differs too much.
+        setTasks(db.getTasks(user.id, user.role));
+      } catch (error) {
+        console.error("Dashboard fetch error", error);
+      }
+    };
+    fetchData();
+  }, [user]);
+
+  // Calculate Stats on the fly from fetched opportunities
+  const stats = React.useMemo(() => {
+    // Mocking db.getStats logic but with real `opportunities` state
+    const totalActive = opportunities.filter(o => o.stage !== OpportunityStage.GANADA && o.stage !== OpportunityStage.PERDIDA).length;
+    const totalWon = opportunities.filter(o => o.stage === OpportunityStage.GANADA).length;
+    const amountWon = opportunities.filter(o => o.stage === OpportunityStage.GANADA).reduce((acc, o) => acc + o.amount, 0);
+    const amountPipeline = opportunities.filter(o => o.stage !== OpportunityStage.GANADA && o.stage !== OpportunityStage.PERDIDA).reduce((acc, o) => acc + o.amount, 0);
+    const totalDeleted = opportunities.filter(o => o.stage === OpportunityStage.PERDIDA).length;
+
+    return { totalActive, totalWon, amountWon, amountPipeline, totalDeleted };
+  }, [opportunities]);
+
+  const funnelData = React.useMemo(() => {
     const stages = Object.values(OpportunityStage);
     return stages.map(stage => ({
       name: stage,
@@ -188,7 +225,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <div key={activity.id} className="flex gap-4 relative pl-2 group">
                 <div className="absolute left-[7px] top-8 bottom-[-24px] w-px bg-slate-100 last:hidden group-hover:bg-brand-100 transition-colors"></div>
                 <div className={`w-3.5 h-3.5 mt-1.5 rounded-full ring-4 ring-white shrink-0 shadow-sm ${activity.type === 'win' ? 'bg-emerald-500' :
-                    activity.type === 'new' ? 'bg-blue-500' : 'bg-slate-300'
+                  activity.type === 'new' ? 'bg-blue-500' : 'bg-slate-300'
                   }`}></div>
                 <div>
                   <p className="text-sm font-medium text-slate-700 leading-snug group-hover:text-brand-800 transition-colors">{activity.text}</p>
