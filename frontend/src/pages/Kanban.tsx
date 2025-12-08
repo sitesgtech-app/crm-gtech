@@ -90,12 +90,26 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         try {
             // Fetch Deals from Backend
             const dealsRes = await api.get('/deals');
+            // Mapping Stages Backend (English ENUM) -> Frontend (Spanish)
+            const mapBackendStageToFrontend = (backendStage: string) => {
+                switch (backendStage) {
+                    case 'CONTACTED': return OpportunityStage.CONTACTADO;
+                    case 'LEAD': return OpportunityStage.SOLICITUD; // Assuming LEAD -> SOLICITUD based on default
+                    case 'PROPOSAL': return OpportunityStage.PROPUESTA;
+                    case 'NEGOTIATION': return OpportunityStage.NEGOCIACION;
+                    case 'CLOSED_WON': return OpportunityStage.GANADA;
+                    case 'CLOSED_LOST': return OpportunityStage.PERDIDA;
+                    default: return OpportunityStage.SOLICITUD;
+                }
+            };
+
             const backendDeals = dealsRes.data.map((d: any) => ({
                 ...d,
                 responsibleId: d.ownerId, // Map backend ownerId to frontend responsibleId
                 clientName: d.client?.name || 'Cliente Desconocido',
                 amount: d.value || 0, // Map value to amount
-                name: d.title // Map title to name
+                name: d.title, // Map title to name
+                stage: mapBackendStageToFrontend(d.stage) // FIX: Map English stage to Spanish Enum
             }));
             setOpportunities(backendDeals);
 
