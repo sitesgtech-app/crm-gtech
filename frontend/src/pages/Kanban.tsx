@@ -535,8 +535,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                             <div className={`p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10 bg-slate-100/90 backdrop-blur-md border-b border-white/50`}>
                                 <div className="flex items-center gap-2">
                                     <span className={`w-3 h-3 rounded-full ${stage === OpportunityStage.GANADA ? 'bg-green-500' :
-                                            stage === OpportunityStage.PERDIDA ? 'bg-red-500' :
-                                                'bg-brand-500'
+                                        stage === OpportunityStage.PERDIDA ? 'bg-red-500' :
+                                            'bg-brand-500'
                                         }`}></span>
                                     <span className="font-bold text-slate-700 font-lato text-sm uppercase tracking-wide">{stage}</span>
                                 </div>
@@ -564,8 +564,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         {/* Tags Row */}
                                         <div className="flex justify-between items-start">
                                             <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${opp.sector === 'Gubernamental'
-                                                    ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                                                    : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                                : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
                                                 }`}>
                                                 {opp.sector || 'Privado'}
                                             </div>
@@ -594,8 +594,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                             <div className="flex items-center gap-2">
                                                 {/* Probability Badge */}
                                                 <div className={`flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold ${opp.probability >= 80 ? 'bg-green-100 text-green-700' :
-                                                        opp.probability >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                                                            'bg-slate-100 text-slate-600'
+                                                    opp.probability >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                                                        'bg-slate-100 text-slate-600'
                                                     }`}>
                                                     {opp.probability}%
                                                 </div>
