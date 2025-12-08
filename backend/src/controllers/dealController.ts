@@ -84,3 +84,56 @@ export const updateDealStage = async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Failed to update deal' });
     }
 };
+
+export const updateDeal = async (req: Request, res: Response) => {
+    try {
+        const { userId, role, organizationId } = (req as AuthRequest).user!;
+        const { id } = req.params;
+        const data = req.body;
+
+        const whereClause: any = { id, organizationId: organizationId || 'org1' };
+        if (role !== 'ADMIN') {
+            whereClause.ownerId = userId;
+        }
+
+        const existing = await prisma.deal.findFirst({ where: whereClause });
+        if (!existing) return res.status(404).json({ error: 'Deal not found or access denied' });
+
+        const updated = await prisma.deal.update({
+            where: { id },
+            data: {
+                title: data.title,
+                value: data.value ? Number(data.value) : undefined,
+                clientId: data.clientId,
+                stage: data.stage,
+                probability: data.probability ? Number(data.probability) : undefined,
+                expectedCloseDate: data.expectedCloseDate ? new Date(data.expectedCloseDate) : undefined,
+            }
+        });
+        res.json(updated);
+    } catch (error) {
+        console.error("Update Deal Error", error);
+        res.status(400).json({ error: 'Failed to update deal' });
+    }
+};
+
+export const deleteDeal = async (req: Request, res: Response) => {
+    try {
+        const { userId, role, organizationId } = (req as AuthRequest).user!;
+        const { id } = req.params;
+
+        const whereClause: any = { id, organizationId: organizationId || 'org1' };
+        if (role !== 'ADMIN') {
+            whereClause.ownerId = userId;
+        }
+
+        const existing = await prisma.deal.findFirst({ where: whereClause });
+        if (!existing) return res.status(404).json({ error: 'Deal not found or access denied' });
+
+        await prisma.deal.delete({ where: { id } });
+        res.json({ message: 'Deal deleted successfully' });
+    } catch (error) {
+        console.error("Delete Deal Error", error);
+        res.status(500).json({ error: 'Failed to delete deal' });
+    }
+};
