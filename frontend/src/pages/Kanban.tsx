@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Search, AlertCircle, X, Calendar, MessageCircle, Phone, Mail, MapPin, Clock, Save, UserCircle, Check, Building, ArrowRightLeft, FileText, DollarSign, Calculator, Package, Briefcase, Trash2, Edit, Upload, FileCheck, Paperclip, Eye, Receipt, TrendingUp, PieChart } from 'lucide-react';
+import { Plus, Search, AlertCircle, X, Calendar, MessageCircle, Phone, Mail, MapPin, Clock, Save, UserCircle, Check, Building, ArrowRightLeft, FileText, DollarSign, Calculator, Package, Trash2, Edit, Upload, FileCheck, Eye, TrendingUp, PieChart } from 'lucide-react';
 import { db } from '../services/db';
 import api from '../services/api';
 import { User, Opportunity, OpportunityStage, Activity, Client, Quotation } from '../types';
@@ -545,11 +545,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         return { baseAmount, totalCost, ivaAmount, isrAmount, grossProfit, finalProfit, cashReceived, calculationDetails };
     }, [newOpp.amount, newOpp.unitCost, newOpp.quantity, newOpp.sector]);
 
-    const getStageColor = (stage: string) => {
-        if (stage === OpportunityStage.GANADA) return 'border-t-4 border-t-green-500 bg-green-50/50';
-        if (stage === OpportunityStage.PERDIDA) return 'border-t-4 border-t-red-500 bg-red-50/50';
-        return 'border-t-4 border-t-brand-500 bg-slate-100';
-    };
+
 
     const getCardBorderColor = (opp: Opportunity) => {
         switch (opp.stage) {
