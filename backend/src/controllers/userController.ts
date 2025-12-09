@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
+
 import bcrypt from 'bcryptjs';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
@@ -21,7 +23,9 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
     try {
+
         const { userId, organizationId } = (req as AuthRequest).user!;
+        const { email, password, name, role, phone } = req.body;
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
