@@ -19,7 +19,7 @@ export const getTickets = async (req: Request, res: Response) => {
 
 // Email service import handled separately or assume dynamic import to avoid relative path issues if strictly enforced, 
 // using relative path normally:
-import { sendEmail } from '../lib/email';
+
 
 interface AuthRequest extends Request {
     user?: {
@@ -55,21 +55,7 @@ export const createTicket = async (req: Request, res: Response) => {
             include: { assignedTo: true }
         });
 
-        // Send Email Notification if assigned
-        // Cast to any to avoid TS error: Property 'assignedTo' does not exist on type...
-        const ticketAny = ticket as any;
-        if (ticketAny.assignedTo && ticketAny.assignedTo.email) {
-            const emailHtml = `
-                <h2>Nuevo Ticket Asignado</h2>
-                <p>Se te ha asignado un nuevo ticket en GTECH CRM.</p>
-                <p><strong>Título:</strong> ${ticketAny.title}</p>
-                <p><strong>Prioridad:</strong> ${ticketAny.priority}</p>
-                <p><strong>Descripción:</strong><br>${ticketAny.description}</p>
-                <br>
-                <p>Ingresa al CRM para gestionarlo.</p>
-            `;
-            await sendEmail(ticketAny.assignedTo.email, `Nuevo Ticket Asignado: ${ticketAny.title}`, emailHtml);
-        }
+
 
         res.status(201).json(ticket);
     } catch (error) {
