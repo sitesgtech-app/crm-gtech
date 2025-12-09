@@ -43,27 +43,32 @@ export const createTicket = async (req: Request, res: Response) => {
         const { organizationId } = (req as AuthRequest).user!;
         const data = ticketSchema.parse(req.body);
 
+        const { clientId, ...otherData } = data;
+
         const ticket = await prisma.ticket.create({
             data: {
-                ...data,
-                priority: data.priority || 'MEDIUM', // Default fallback
+                ...otherData,
+                clientId: clientId || undefined,
+                priority: data.priority || 'MEDIUM',
                 organizationId: organizationId || 'org1'
-            },
+            } as any,
             include: { assignedTo: true }
         });
 
         // Send Email Notification if assigned
-        if (ticket.assignedTo && ticket.assignedTo.email) {
+        // Cast to any to avoid TS error: Property 'assignedTo' does not exist on type...
+        const ticketAny = ticket as any;
+        if (ticketAny.assignedTo && ticketAny.assignedTo.email) {
             const emailHtml = `
                 <h2>Nuevo Ticket Asignado</h2>
                 <p>Se te ha asignado un nuevo ticket en GTECH CRM.</p>
-                <p><strong>Título:</strong> ${ticket.title}</p>
-                <p><strong>Prioridad:</strong> ${ticket.priority}</p>
-                <p><strong>Descripción:</strong><br>${ticket.description}</p>
+                <p><strong>Título:</strong> ${ticketAny.title}</p>
+                <p><strong>Prioridad:</strong> ${ticketAny.priority}</p>
+                <p><strong>Descripción:</strong><br>${ticketAny.description}</p>
                 <br>
                 <p>Ingresa al CRM para gestionarlo.</p>
             `;
-            await sendEmail(ticket.assignedTo.email, `Nuevo Ticket Asignado: ${ticket.title}`, emailHtml);
+            await sendEmail(ticketAny.assignedTo.email, `Nuevo Ticket Asignado: ${ticketAny.title}`, emailHtml);
         }
 
         res.status(201).json(ticket);
