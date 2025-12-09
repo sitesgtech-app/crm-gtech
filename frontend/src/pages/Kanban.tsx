@@ -657,6 +657,9 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                     </div>
                                     <div className="flex items-baseline gap-1.5 shrink-0">
                                         <span className="text-[10px] font-bold opacity-90 font-lato">
+                                            Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0, notation: 'compact' })}
+                                        </span>
+                                        <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">{stageCount}</span>
                                     </div>
 
                                     {/* Cards Area */}
