@@ -80,7 +80,11 @@ export const login = async (req: Request, res: Response) => {
 
         res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
     } catch (error) {
-        res.status(400).json({ error: 'Datos inválidos' });
+        console.error("Login Error:", error);
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: 'Datos inválidos: ' + error.errors.map(e => e.message).join(', ') });
+        }
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 };
 
