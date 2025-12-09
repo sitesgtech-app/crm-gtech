@@ -64,3 +64,25 @@ export const getClient = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch client' });
     }
 };
+
+export const deleteClient = async (req: Request, res: Response) => {
+    try {
+        const { organizationId } = (req as AuthRequest).user!;
+        const { id } = req.params;
+
+        // Ensure client belongs to organization before deleting
+        const client = await prisma.client.findFirst({
+            where: { id, organizationId: organizationId || 'org1' }
+        });
+
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found or access denied' });
+        }
+
+        await prisma.client.delete({ where: { id } });
+        res.json({ message: 'Client deleted successfully' });
+    } catch (error) {
+        console.error("Delete Client Error", error);
+        res.status(500).json({ error: 'Failed to delete client' });
+    }
+};

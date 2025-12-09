@@ -27,6 +27,7 @@ router.delete('/users/:id', userController.deleteUser);
 router.get('/clients', clientController.getClients);
 router.post('/clients', clientController.createClient);
 router.get('/clients/:id', clientController.getClient);
+router.delete('/clients/:id', clientController.deleteClient);
 
 // Deal Routes
 router.get('/deals', dealController.getDeals);

@@ -344,9 +344,22 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button onClick={(e) => { e.stopPropagation(); handleEdit(client) }} className="text-brand-600 hover:text-brand-800 text-sm font-medium">
-                      Editar
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={(e) => { e.stopPropagation(); handleEdit(client) }} className="text-brand-600 hover:text-brand-800 text-sm font-medium">
+                        Editar
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm('¿Está seguro de eliminar este cliente?')) {
+                            api.delete(`/clients/${client.id}`).then(() => refreshData()).catch(e => alert("Error al eliminar"));
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
