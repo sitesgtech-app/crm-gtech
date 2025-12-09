@@ -31,7 +31,7 @@ interface AuthRequest extends Request {
 const ticketSchema = z.object({
     title: z.string(),
     description: z.string(),
-    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
+    priority: z.enum(['Baja', 'Media', 'Alta', 'Urgente']).optional(),
     clientId: z.string().optional().nullable(),
     assignedToId: z.string().optional(),
     department: z.string().optional(),
@@ -49,7 +49,7 @@ export const createTicket = async (req: Request, res: Response) => {
             data: {
                 ...otherData,
                 clientId: clientId || undefined,
-                priority: data.priority || 'MEDIUM',
+                priority: data.priority || 'Media',
                 organizationId: organizationId || 'org1'
             } as any,
             include: { assignedTo: true }
