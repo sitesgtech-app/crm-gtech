@@ -4,11 +4,17 @@ import bcrypt from 'bcryptjs';
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
+        const { organizationId } = (req as AuthRequest).user!;
         const users = await prisma.user.findMany({
+            where: {
+                organizationId: organizationId || 'org1',
+                active: true
+            },
             select: { id: true, name: true, email: true, role: true, active: true, phone: true },
         });
         res.json(users);
     } catch (error) {
+        console.error('Get Users Error:', error);
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 };
