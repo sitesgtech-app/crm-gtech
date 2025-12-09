@@ -610,7 +610,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
             {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-                <div className="flex gap-4 h-full min-w-max px-4 md:px-0 snap-x snap-mandatory pb-4">
+                <div className="flex gap-2 lg:gap-3 h-full px-2 md:px-0 snap-x snap-mandatory pb-4 w-full">
                     {stages.map((stage) => {
                         const stageOpps = filteredOpps.filter(o => o.stage === stage);
                         const stageTotal = stageOpps.reduce((sum, o) => sum + o.amount, 0);
@@ -619,18 +619,18 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                         return (
                             <div
                                 key={stage}
-                                className={`w-[85vw] md:w-[320px] lg:w-[350px] flex flex-col rounded-none max-h-full bg-slate-50 border-r border-slate-200 snap-center`}
+                                className={`flex-1 min-w-[200px] md:min-w-0 flex flex-col rounded-lg max-h-full bg-slate-50/50 border border-slate-200 snap-center`}
                                 onDragOver={onDragOver}
                                 onDrop={(e) => onDrop(e, stage)}
                             >
                                 {/* Chevron Header */}
-                                <div className="h-20 bg-white border-b-4 border-slate-100 flex flex-col justify-center px-4 relative group hover:bg-slate-50 transition-colors">
-                                    <h3 className="uppercase text-sm font-bold text-slate-800 tracking-wider flex items-center gap-2">
-                                        {stage}
-                                        {stage === OpportunityStage.GANADA && <Check size={16} className="text-green-500" />}
+                                <div className="h-14 lg:h-16 bg-white border-b border-slate-200 flex flex-col justify-center px-2 lg:px-4 relative group hover:bg-slate-50 transition-colors rounded-t-lg">
+                                    <h3 className="uppercase text-[10px] lg:text-xs font-bold text-slate-800 tracking-wider flex items-center justify-between gap-1 truncate">
+                                        <span className="truncate">{stage}</span>
+                                        {stage === OpportunityStage.GANADA && <Check size={12} className="text-green-500 shrink-0" />}
                                     </h3>
-                                    <p className="text-xs text-slate-400 mt-1 font-medium">
-                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })} <span className="text-slate-300">/</span> {stageCount} Deals
+                                    <p className="text-[10px] text-slate-400 mt-0.5 font-medium truncate">
+                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0, notation: 'compact' })} <span className="text-slate-300">/</span> {stageCount}
                                     </p>
 
                                     {/* Arrow Shape (Visual only using border trick or SVG for cleaner look) */}
