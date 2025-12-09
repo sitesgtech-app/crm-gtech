@@ -549,10 +549,10 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
     const getCardBorderColor = (opp: Opportunity) => {
         switch (opp.stage) {
-            case OpportunityStage.SOLICITUD: return 'border-l-blue-500';
-            case OpportunityStage.CONTACTADO: return 'border-l-indigo-500';
-            case OpportunityStage.PROPUESTA: return 'border-l-purple-500';
-            case OpportunityStage.NEGOCIACION: return 'border-l-amber-500';
+            case OpportunityStage.SOLICITUD:
+            case OpportunityStage.CONTACTADO:
+            case OpportunityStage.PROPUESTA: return 'border-l-sky-400';
+            case OpportunityStage.NEGOCIACION: return 'border-l-blue-600';
             case OpportunityStage.GANADA: return 'border-l-emerald-500';
             case OpportunityStage.PERDIDA: return 'border-l-red-500';
             default: return 'border-l-slate-200';
@@ -562,13 +562,11 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
     const getStageStyles = (stage: OpportunityStage) => {
         switch (stage) {
             case OpportunityStage.SOLICITUD:
-                return { header: 'bg-blue-600 text-white border-blue-700', body: 'bg-blue-50/50 border-blue-100', dot: 'bg-blue-200' };
             case OpportunityStage.CONTACTADO:
-                return { header: 'bg-indigo-600 text-white border-indigo-700', body: 'bg-indigo-50/50 border-indigo-100', dot: 'bg-indigo-200' };
             case OpportunityStage.PROPUESTA:
-                return { header: 'bg-purple-600 text-white border-purple-700', body: 'bg-purple-50/50 border-purple-100', dot: 'bg-purple-200' };
+                return { header: 'bg-sky-500 text-white border-sky-600', body: 'bg-sky-50/50 border-sky-100', dot: 'bg-sky-200' };
             case OpportunityStage.NEGOCIACION:
-                return { header: 'bg-amber-500 text-white border-amber-600', body: 'bg-amber-50/50 border-amber-100', dot: 'bg-amber-200' };
+                return { header: 'bg-blue-600 text-white border-blue-700', body: 'bg-blue-50/50 border-blue-100', dot: 'bg-blue-200' };
             case OpportunityStage.GANADA:
                 return { header: 'bg-emerald-600 text-white border-emerald-700', body: 'bg-emerald-50/50 border-emerald-100', dot: 'bg-emerald-200' };
             case OpportunityStage.PERDIDA:
