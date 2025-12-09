@@ -661,551 +661,552 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                         </span>
                                         <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">{stageCount}</span>
                                     </div>
+                                </div>
 
-                                    {/* Cards Area */}
-                                    <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
-                                        {stageOpps.map((opp) => (
-                                            <div
-                                                key={opp.id}
-                                                draggable
-                                                onDragStart={(e) => onDragStart(e, opp.id)}
-                                                onClick={() => setSelectedOpp(opp)}
-                                                className={`bg-white p-3 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-1.5 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
-                                            >
-                                                {/* Top Row: Dot + Name */}
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div className="flex items-start gap-2 overflow-hidden">
-                                                        <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
-                                                        <div className="min-w-0">
-                                                            <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight font-lato group-hover:text-brand-700 truncate">{opp.name}</h4>
-                                                            <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
-                                                                <Building size={10} />
-                                                                <span className="truncate max-w-[120px]">{opp.clientName}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Sentiment / Probability Icon */}
-                                                    {opp.probability >= 80 ? <div className="text-green-500 shrink-0"><TrendingUp size={14} /></div> :
-                                                        opp.probability <= 30 ? <div className="text-amber-400 shrink-0"><AlertCircle size={14} /></div> :
-                                                            <div className="text-slate-300 shrink-0"><PieChart size={14} /></div>
-                                                    }
-                                                </div>
-
-                                                {/* Middle Row: Amount & Details */}
-                                                <div className="flex items-center justify-between mt-1 pl-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <p className="text-xs md:text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
-                                                        <div className="h-3 w-px bg-slate-200"></div>
-                                                        <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
-                                                            <Calculator size={10} />
-                                                            {opp.probability}%
+                                {/* Cards Area */}
+                                <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
+                                    {stageOpps.map((opp) => (
+                                        <div
+                                            key={opp.id}
+                                            draggable
+                                            onDragStart={(e) => onDragStart(e, opp.id)}
+                                            onClick={() => setSelectedOpp(opp)}
+                                            className={`bg-white p-3 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-1.5 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
+                                        >
+                                            {/* Top Row: Dot + Name */}
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-start gap-2 overflow-hidden">
+                                                    <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight font-lato group-hover:text-brand-700 truncate">{opp.name}</h4>
+                                                        <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                                                            <Building size={10} />
+                                                            <span className="truncate max-w-[120px]">{opp.clientName}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Footer: Advisor & Stagnant Warning */}
-                                                <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 pl-1">
-                                                    <div className="flex items-center gap-1.5">
-                                                        {getResponsibleAvatar(opp.responsibleId) ? (
-                                                            <img src={getResponsibleAvatar(opp.responsibleId) || ''} alt="Av" className="w-4 h-4 rounded-full" />
-                                                        ) : (
-                                                            <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                                                {users.find(u => u.id === opp.responsibleId)?.name.charAt(0) || '?'}
-                                                            </div>
-                                                        )}
-                                                        <span className="text-[10px] text-slate-400 font-medium truncate max-w-[80px]">
-                                                            {users.find(u => u.id === opp.responsibleId)?.name || 'Sin Asignar'}
-                                                        </span>
-                                                    </div>
+                                                {/* Sentiment / Probability Icon */}
+                                                {opp.probability >= 80 ? <div className="text-green-500 shrink-0"><TrendingUp size={14} /></div> :
+                                                    opp.probability <= 30 ? <div className="text-amber-400 shrink-0"><AlertCircle size={14} /></div> :
+                                                        <div className="text-slate-300 shrink-0"><PieChart size={14} /></div>
+                                                }
+                                            </div>
 
-                                                    {isStagnant(opp) && (
-                                                        <div className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                                            <Clock size={10} />
-                                                            <span>Inactivo</span>
+                                            {/* Middle Row: Amount & Details */}
+                                            <div className="flex items-center justify-between mt-1 pl-3">
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-xs md:text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
+                                                    <div className="h-3 w-px bg-slate-200"></div>
+                                                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                                                        <Calculator size={10} />
+                                                        {opp.probability}%
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Footer: Advisor & Stagnant Warning */}
+                                            <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 pl-1">
+                                                <div className="flex items-center gap-1.5">
+                                                    {getResponsibleAvatar(opp.responsibleId) ? (
+                                                        <img src={getResponsibleAvatar(opp.responsibleId) || ''} alt="Av" className="w-4 h-4 rounded-full" />
+                                                    ) : (
+                                                        <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                                                            {users.find(u => u.id === opp.responsibleId)?.name.charAt(0) || '?'}
                                                         </div>
                                                     )}
+                                                    <span className="text-[10px] text-slate-400 font-medium truncate max-w-[80px]">
+                                                        {users.find(u => u.id === opp.responsibleId)?.name || 'Sin Asignar'}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                        ))}
 
-                                        {/* Empty State placeholder */}
-                                        {stageOpps.length === 0 && (
-                                            <div className="h-32 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-xl m-2">
-                                                <Package size={24} className="mb-2 opacity-50" />
-                                                <span className="text-xs font-medium">Sin tratos</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                );
-                    })}
-                            </div>
-        </div>
-
-                {/* --- MODALS --- */}
-                {/* Quotation Generator */}
-                {
-                    isQuotationModalOpen && selectedOppForQuote && (
-                        <QuotationGenerator
-                            opportunity={selectedOppForQuote}
-                            client={clients.find(c => c.id === selectedOppForQuote.clientId)}
-                            user={user}
-                            onClose={() => setIsQuotationModalOpen(false)}
-                            onSave={handleSaveQuotation}
-                        />
-                    )
-                }
-
-                {/* Main Opportunity Form */}
-                {
-                    isNewModalOpen && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all scale-100">
-                                <div className="p-6 border-b border-slate-100 flex justify-between sticky top-0 bg-white z-10 items-center">
-                                    <h2 className="text-xl font-bold text-slate-800 font-lato flex items-center gap-2">
-                                        {newOpp.id ? <Edit className="text-brand-600" /> : <Plus className="text-brand-600" />}
-                                        {newOpp.id ? 'Editar Oportunidad' : 'Nueva Oportunidad'}
-                                    </h2>
-                                    <div className="flex gap-2 items-center">
-                                        {newOpp.id && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDeleteOpportunity(newOpp.id!)}
-                                                className="text-red-400 hover:text-red-600 mr-2 p-2 hover:bg-red-50 rounded-full transition-colors"
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
-                                        )}
-                                        <button onClick={() => setIsNewModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="text-slate-400 hover:text-slate-600" /></button>
-                                    </div>
-                                </div>
-                                <form onSubmit={handleCreateOpp} className="p-8 space-y-8">
-
-                                    {/* SECTION 1 */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 pb-2 border-b border-slate-100">
-                                            <UserCircle size={14} /> Cliente & Responsable
-                                        </h3>
-
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Asesor Asignado</label>
-                                                <select
-                                                    className="w-full border border-slate-200 rounded-xl p-2.5 text-sm bg-white focus:bg-white focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-                                                    value={newOpp.responsibleId}
-                                                    onChange={(e) => setNewOpp({ ...newOpp, responsibleId: e.target.value })}
-                                                >
-                                                    {users
-                                                        .filter(u => u.active)
-                                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                                        .map(u => (
-                                                            <option key={u.id} value={u.id}>
-                                                                {u.name} ({u.role})
-                                                            </option>
-                                                        ))
-                                                    }
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        {!newOpp.id && (
-                                            <div className="flex p-1 bg-slate-100 rounded-lg w-fit">
-                                                <button type="button" onClick={() => setIsExistingClient(true)} className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${isExistingClient ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>Existente</button>
-                                                <button type="button" onClick={() => setIsExistingClient(false)} className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${!isExistingClient ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>Nuevo Cliente</button>
-                                            </div>
-                                        )}
-
-                                        {isExistingClient ? (
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Buscar Cliente</label>
-                                                <select
-                                                    required
-                                                    className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none"
-                                                    value={selectedClientId}
-                                                    onChange={e => setSelectedClientId(e.target.value)}
-                                                    disabled={!!newOpp.id}
-                                                >
-                                                    <option value="">Seleccionar Cliente...</option>
-                                                    {clients.map(c => <option key={c.id} value={c.id}>{c.name} - {c.company}</option>)}
-                                                </select>
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                                <div className="col-span-2 md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Nombre Cliente *</label>
-                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.name} onChange={e => setNewClientData({ ...newClientData, name: e.target.value })} />
-                                                </div>
-                                                <div className="col-span-2 md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">NIT *</label>
-                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono *</label>
-                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Correo *</label>
-                                                    <input required type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* SECTION 2 */}
-                                    <div className="space-y-6">
-                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 pb-2 border-b border-slate-100">
-                                            <DollarSign size={14} /> Datos Económicos
-                                        </h3>
-
-                                        {/* Sector */}
-                                        <div className="flex gap-4">
-                                            {['Privado', 'Gubernamental'].map(sector => (
-                                                <label key={sector} className={`flex-1 cursor-pointer border rounded-xl p-3 flex items-center gap-3 transition-all ${newOpp.sector === sector ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-slate-200 hover:bg-slate-50'}`}>
-                                                    <input type="radio" name="sector" value={sector} checked={newOpp.sector === sector} onChange={() => setNewOpp({ ...newOpp, sector: sector as any })} className="text-brand-600 focus:ring-brand-500" />
-                                                    <div>
-                                                        <span className="text-sm font-bold text-slate-800 block">{sector}</span>
-                                                        <span className="text-[10px] text-slate-500">{sector === 'Privado' ? 'ISR Normal' : 'Retenciones Estado'}</span>
+                                                {isStagnant(opp) && (
+                                                    <div className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                        <Clock size={10} />
+                                                        <span>Inactivo</span>
                                                     </div>
-                                                </label>
-                                            ))}
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="col-span-2">
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre Oportunidad</label>
-                                                <input required type="text" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ej. Licencia Anual" value={newOpp.name} onChange={e => setNewOpp({ ...newOpp, name: e.target.value })} />
-                                            </div>
-
-                                            {/* Item Type */}
-                                            <div className="col-span-2 flex gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                                <span className="text-sm font-bold text-slate-700">Tipo:</span>
-                                                <label className="flex items-center gap-2 cursor-pointer text-sm">
-                                                    <input type="radio" name="itemType" value="Producto" checked={newOpp.itemType !== 'Servicio'} onChange={() => setNewOpp({ ...newOpp, itemType: 'Producto' })} className="text-brand-600" /> Producto
-                                                </label>
-                                                <label className="flex items-center gap-2 cursor-pointer text-sm">
-                                                    <input type="radio" name="itemType" value="Servicio" checked={newOpp.itemType === 'Servicio'} onChange={() => setNewOpp({ ...newOpp, itemType: 'Servicio' })} className="text-brand-600" /> Servicio
-                                                </label>
-                                            </div>
-
-                                            {/* Calculator Inputs */}
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Cantidad</label>
-                                                <input type="number" min="1" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.quantity} onChange={e => handleQuantityChange(Number(e.target.value))} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Costo Unitario (Q)</label>
-                                                <input type="number" min="0" step="0.01" className="w-full border border-slate-200 rounded-xl p-2.5 text-red-600 font-medium bg-white" value={newOpp.unitCost} onChange={e => handleCostChange(Number(e.target.value))} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Margen (%)</label>
-                                                <input type="number" step="0.1" max="99" className="w-full border border-slate-200 rounded-xl p-2.5 text-blue-600 font-bold bg-white" value={newOpp.profitMargin ? Number(newOpp.profitMargin).toFixed(1) : 0} onChange={e => handleMarginChange(Number(e.target.value))} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Precio Unit. Venta (Q)</label>
-                                                <input type="number" min="0" step="0.01" className="w-full border border-slate-200 rounded-xl p-2.5 font-bold bg-white" value={newOpp.unitPrice ? Number(newOpp.unitPrice).toFixed(2) : 0} onChange={e => handlePriceChange(Number(e.target.value))} />
-                                            </div>
-
-                                            <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
-                                                <div className="bg-slate-100 p-4 rounded-xl flex flex-col justify-between items-start border border-slate-200">
-                                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Costo Total</span>
-                                                    <span className="text-xl font-bold font-lato text-slate-700">Q{Number((newOpp.unitCost || 0) * (newOpp.quantity || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                </div>
-                                                <div className="bg-slate-900 text-white p-4 rounded-xl flex flex-col justify-between items-start shadow-lg">
-                                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Venta Total (IVA Inc.)</span>
-                                                    <span className="text-xl font-bold font-lato">Q{Number(newOpp.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-span-2 bg-green-50 border border-green-100 p-4 rounded-xl">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-sm font-bold text-green-800 flex items-center gap-2"><Calculator size={14} /> Utilidad Neta Estimada</span>
-                                                    <span className="text-lg font-bold text-green-700">Q{calculatedProfitInForm.finalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                </div>
-                                                <div className="text-[10px] text-slate-500 space-y-1 border-t border-green-200 pt-2">
-                                                    {calculatedProfitInForm.calculationDetails.map((detail, idx) => (
-                                                        <div key={idx} className={`flex justify-between ${detail.color}`}>
-                                                            <span>{detail.label}</span>
-                                                            <span>Q{detail.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Probabilidad (%)</label>
-                                                <input type="number" min="0" max="100" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.probability} onChange={e => setNewOpp({ ...newOpp, probability: Number(e.target.value) })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Origen</label>
-                                                <select className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.origin} onChange={e => setNewOpp({ ...newOpp, origin: e.target.value })}>
-                                                    <option value="Sitio Web">Sitio Web</option>
-                                                    <option value="Referido">Referido</option>
-                                                    <option value="Llamada Fría">Llamada Fría</option>
-                                                    <option value="Referencia de BNI">Referencia de BNI</option>
-                                                    <option value="WhatsApp">WhatsApp</option>
-                                                    <option value="Evento">Evento</option>
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Fecha Estimada de Cierre</label>
-                                                <input
-                                                    type="date"
-                                                    className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none"
-                                                    value={newOpp.estimatedCloseDate ? newOpp.estimatedCloseDate.split('T')[0] : ''}
-                                                    onChange={(e) => setNewOpp({ ...newOpp, estimatedCloseDate: e.target.value ? new Date(e.target.value).toISOString() : new Date().toISOString() })}
-                                                />
-                                            </div>
-
-                                            {/* Observation Field for Date Change */}
-                                            {newOpp.id && (() => {
-                                                const original = opportunities.find(o => o.id === newOpp.id);
-                                                if (original && original.estimatedCloseDate && newOpp.estimatedCloseDate) {
-                                                    const formatLame = (iso: string) => iso.split('T')[0];
-                                                    const oldDate = formatLame(original.estimatedCloseDate);
-                                                    const newDate = formatLame(newOpp.estimatedCloseDate);
-
-                                                    // Compare YYYY-MM-DD strings
-                                                    if (oldDate !== newDate) {
-                                                        return (
-                                                            <div className="col-span-2 bg-yellow-50 p-4 rounded-xl border border-yellow-200 animate-fade-in">
-                                                                <label className="block text-sm font-bold text-yellow-800 mb-1.5 flex items-center gap-2">
-                                                                    <AlertCircle size={16} /> Observación de Cambio de Fecha (Obligatorio)
-                                                                </label>
-                                                                <p className="text-xs text-yellow-600 mb-2">Está cambiando la fecha de cierre estimadad de {original.estimatedCloseDate.split('T')[0]} a {newOpp.estimatedCloseDate!.split('T')[0]}.</p>
-                                                                <textarea
-                                                                    required
-                                                                    className="w-full border border-yellow-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-yellow-500/20 outline-none"
-                                                                    placeholder="Explique la razón del cambio de fecha..."
-                                                                    value={newOpp.dateChangeObservation || ''}
-                                                                    onChange={e => setNewOpp({ ...newOpp, dateChangeObservation: e.target.value })}
-                                                                />
-                                                            </div>
-                                                        );
-                                                    }
-                                                }
-                                                return null;
-                                            })()}
-                                            <div className="col-span-2">
-                                                <label className="block text-sm font-bold text-slate-700 mb-1.5">Notas</label>
-                                                <textarea className="w-full border border-slate-200 rounded-xl p-2.5 h-24 bg-white resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" value={newOpp.description} onChange={e => setNewOpp({ ...newOpp, description: e.target.value })} />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-6 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white pb-0">
-                                        <button type="button" onClick={() => setIsNewModalOpen(false)} className="px-6 py-2.5 text-slate-600 hover:bg-slate-50 rounded-xl font-bold transition-colors">Cancelar</button>
-                                        <button type="submit" className="px-8 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold shadow-lg shadow-brand-500/30 transition-all transform hover:scale-105">Guardar Oportunidad</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )
-                }
-
-                {/* Loss Reason Modal */}
-                {
-                    pendingStageChange && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
-                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-100">
-                                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-                                    <AlertCircle size={32} />
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-2 font-lato">Oportunidad Perdida</h3>
-                                <p className="text-sm text-slate-500 mb-6">Ayúdanos a mejorar registrando el motivo.</p>
-                                <select
-                                    className="w-full border border-slate-200 rounded-xl p-3 mb-6 bg-white outline-none focus:ring-2 focus:ring-red-200 text-sm"
-                                    value={lossReasonInput}
-                                    onChange={(e) => setLossReasonInput(e.target.value)}
-                                    autoFocus
-                                >
-                                    <option value="">Seleccionar razón...</option>
-                                    <option value="Precio muy alto">Precio muy alto</option>
-                                    <option value="Competencia">Se fue con la competencia</option>
-                                    <option value="Sin presupuesto">Cliente sin presupuesto</option>
-                                    <option value="Funcionalidad faltante">Funcionalidad faltante</option>
-                                    <option value="Cancelado por cliente">Proyecto cancelado</option>
-                                    <option value="Sin respuesta">Cliente dejó de responder</option>
-                                </select>
-                                <div className="flex gap-3">
-                                    <button onClick={() => setPendingStageChange(null)} className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
-                                    <button onClick={confirmLoss} disabled={!lossReasonInput} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 transition-colors shadow-md shadow-red-500/30">Confirmar</button>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                }
-
-                {/* Detail Modal (Sidebar) */}
-                {
-                    selectedOpp && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-end z-50 transition-all duration-300 backdrop-blur-sm">
-                            <div className="w-full md:w-[600px] h-full bg-white shadow-2xl flex flex-col animate-slide-left">
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
-                                    <div className="flex-1 mr-4">
-                                        <div className="flex gap-2 mb-3 flex-wrap items-center">
-                                            <div className="relative inline-block">
-                                                <select
-                                                    value={selectedOpp.stage}
-                                                    onChange={(e) => handleManualStageChange(e.target.value as OpportunityStage)}
-                                                    className={`text-xs font-bold px-3 py-1.5 rounded-full uppercase appearance-none pr-8 cursor-pointer outline-none border transition-all ${selectedOpp.stage === OpportunityStage.GANADA ? 'bg-green-100 text-green-700 border-green-200' :
-                                                        selectedOpp.stage === OpportunityStage.PERDIDA ? 'bg-red-100 text-red-700 border-red-200' : 'bg-brand-50 text-brand-700 border-brand-200'
-                                                        }`}
-                                                >
-                                                    {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                                                </select>
-                                                <ArrowRightLeft size={12} className="absolute right-2.5 top-2 opacity-50 pointer-events-none" />
-                                            </div>
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-slate-800 font-lato leading-tight">{selectedOpp.name}</h2>
-                                        <p className="text-slate-500 font-medium mt-1">{selectedOpp.clientName}</p>
-                                    </div>
-                                    <button onClick={() => setSelectedOpp(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X size={20} /></button>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                                    {/* Quick Stats Row */}
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                            <p className="text-xs font-bold text-slate-400 uppercase">Valor</p>
-                                            <p className="text-lg font-bold text-slate-800">Q{selectedOpp.amount.toLocaleString()}</p>
-                                        </div>
-                                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                            <p className="text-xs font-bold text-slate-400 uppercase">Probabilidad</p>
-                                            <p className="text-lg font-bold text-slate-800">{selectedOpp.probability}%</p>
-                                        </div>
-                                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                            <p className="text-xs font-bold text-slate-400 uppercase">Cierre Est.</p>
-                                            <p className="text-sm font-bold text-slate-800 mt-1">{new Date(selectedOpp.estimatedCloseDate).toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Purchase Order (If Won) */}
-                                    {selectedOpp.stage === OpportunityStage.GANADA && (
-                                        <div className="bg-green-50 border border-green-100 p-5 rounded-xl">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <h3 className="font-bold text-green-800 text-sm flex items-center gap-2">
-                                                    <FileCheck size={18} /> Orden de Compra
-                                                </h3>
-                                                {selectedOpp.purchaseOrderFile ? (
-                                                    <span className="text-[10px] font-bold text-green-700 bg-white px-2 py-1 rounded border border-green-200 shadow-sm">LISTO</span>
-                                                ) : (
-                                                    <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded">PENDIENTE</span>
                                                 )}
                                             </div>
+                                        </div>
+                                    ))}
 
-                                            {selectedOpp.purchaseOrderFile ? (
-                                                <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200 shadow-sm">
-                                                    <div className="flex items-center gap-3 overflow-hidden">
-                                                        <div className="p-2 bg-green-100 rounded-lg text-green-600"><FileText size={20} /></div>
-                                                        <span className="text-sm text-slate-700 font-medium truncate">{selectedOpp.purchaseOrderFileName || 'OC.pdf'}</span>
-                                                    </div>
-                                                    <a href={selectedOpp.purchaseOrderFile} download={selectedOpp.purchaseOrderFileName || 'OC.pdf'} className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"><Eye size={18} /></a>
-                                                </div>
-                                            ) : (
-                                                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-green-300 rounded-xl cursor-pointer bg-white hover:bg-green-50/50 transition-colors">
-                                                    <Upload className="text-green-400 mb-1" size={24} />
-                                                    <span className="text-xs font-bold text-green-600">Subir Orden de Compra</span>
-                                                    <input type="file" accept="application/pdf,image/*" className="hidden" onChange={handleFileUpload} />
-                                                </label>
-                                            )}
+                                    {/* Empty State placeholder */}
+                                    {stageOpps.length === 0 && (
+                                        <div className="h-32 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-xl m-2">
+                                            <Package size={24} className="mb-2 opacity-50" />
+                                            <span className="text-xs font-medium">Sin tratos</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* --- MODALS --- */}
+            {/* Quotation Generator */}
+            {
+                isQuotationModalOpen && selectedOppForQuote && (
+                    <QuotationGenerator
+                        opportunity={selectedOppForQuote}
+                        client={clients.find(c => c.id === selectedOppForQuote.clientId)}
+                        user={user}
+                        onClose={() => setIsQuotationModalOpen(false)}
+                        onSave={handleSaveQuotation}
+                    />
+                )
+            }
+
+            {/* Main Opportunity Form */}
+            {
+                isNewModalOpen && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all scale-100">
+                            <div className="p-6 border-b border-slate-100 flex justify-between sticky top-0 bg-white z-10 items-center">
+                                <h2 className="text-xl font-bold text-slate-800 font-lato flex items-center gap-2">
+                                    {newOpp.id ? <Edit className="text-brand-600" /> : <Plus className="text-brand-600" />}
+                                    {newOpp.id ? 'Editar Oportunidad' : 'Nueva Oportunidad'}
+                                </h2>
+                                <div className="flex gap-2 items-center">
+                                    {newOpp.id && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteOpportunity(newOpp.id!)}
+                                            className="text-red-400 hover:text-red-600 mr-2 p-2 hover:bg-red-50 rounded-full transition-colors"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    )}
+                                    <button onClick={() => setIsNewModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="text-slate-400 hover:text-slate-600" /></button>
+                                </div>
+                            </div>
+                            <form onSubmit={handleCreateOpp} className="p-8 space-y-8">
+
+                                {/* SECTION 1 */}
+                                <div className="space-y-4">
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 pb-2 border-b border-slate-100">
+                                        <UserCircle size={14} /> Cliente & Responsable
+                                    </h3>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Asesor Asignado</label>
+                                            <select
+                                                className="w-full border border-slate-200 rounded-xl p-2.5 text-sm bg-white focus:bg-white focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+                                                value={newOpp.responsibleId}
+                                                onChange={(e) => setNewOpp({ ...newOpp, responsibleId: e.target.value })}
+                                            >
+                                                {users
+                                                    .filter(u => u.active)
+                                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                                    .map(u => (
+                                                        <option key={u.id} value={u.id}>
+                                                            {u.name} ({u.role})
+                                                        </option>
+                                                    ))
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {!newOpp.id && (
+                                        <div className="flex p-1 bg-slate-100 rounded-lg w-fit">
+                                            <button type="button" onClick={() => setIsExistingClient(true)} className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${isExistingClient ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>Existente</button>
+                                            <button type="button" onClick={() => setIsExistingClient(false)} className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${!isExistingClient ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>Nuevo Cliente</button>
                                         </div>
                                     )}
 
-                                    {/* Activity Feed */}
-                                    <div>
-                                        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                            <Clock className="w-4 h-4 text-brand-500" /> Actividad Reciente
-                                        </h3>
-
-                                        <form onSubmit={handleAddActivity} className="mb-6">
-                                            <div className="relative">
-                                                <textarea
-                                                    placeholder="Registrar nota o actividad..."
-                                                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 h-24 resize-none bg-slate-50 focus:bg-white transition-all"
-                                                    value={newActivity.description}
-                                                    onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
-                                                />
-                                                <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
-                                                    <div className="flex gap-2">
-                                                        <input
-                                                            type="date"
-                                                            required
-                                                            className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
-                                                            value={newActivity.date}
-                                                            onChange={(e) => setNewActivity({ ...newActivity, date: e.target.value })}
-                                                        />
-                                                        <input
-                                                            type="time"
-                                                            required
-                                                            className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
-                                                            value={newActivity.time}
-                                                            onChange={(e) => setNewActivity({ ...newActivity, time: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <button type="submit" className="bg-brand-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-700 transition-colors shadow-sm">Guardar</button>
-                                                </div>
+                                    {isExistingClient ? (
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Buscar Cliente</label>
+                                            <select
+                                                required
+                                                className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none"
+                                                value={selectedClientId}
+                                                onChange={e => setSelectedClientId(e.target.value)}
+                                                disabled={!!newOpp.id}
+                                            >
+                                                <option value="">Seleccionar Cliente...</option>
+                                                {clients.map(c => <option key={c.id} value={c.id}>{c.name} - {c.company}</option>)}
+                                            </select>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            <div className="col-span-2 md:col-span-1">
+                                                <label className="block text-xs font-bold text-slate-500 mb-1">Nombre Cliente *</label>
+                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.name} onChange={e => setNewClientData({ ...newClientData, name: e.target.value })} />
                                             </div>
-                                            <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
-                                                {['Llamada', 'Correo', 'WhatsApp', 'Reunión', 'Visita Técnica'].map(type => (
-                                                    <button
-                                                        key={type}
-                                                        type="button"
-                                                        onClick={() => setNewActivity({ ...newActivity, type })}
-                                                        className={`px-3 py-1 text-[10px] font-bold rounded-full border transition-colors whitespace-nowrap ${newActivity.type === type
-                                                            ? 'bg-brand-600 text-white border-brand-600'
-                                                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-                                                            }`}
-                                                    >
-                                                        {type}
-                                                    </button>
+                                            <div className="col-span-2 md:col-span-1">
+                                                <label className="block text-xs font-bold text-slate-500 mb-1">NIT *</label>
+                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono *</label>
+                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-500 mb-1">Correo *</label>
+                                                <input required type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* SECTION 2 */}
+                                <div className="space-y-6">
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 pb-2 border-b border-slate-100">
+                                        <DollarSign size={14} /> Datos Económicos
+                                    </h3>
+
+                                    {/* Sector */}
+                                    <div className="flex gap-4">
+                                        {['Privado', 'Gubernamental'].map(sector => (
+                                            <label key={sector} className={`flex-1 cursor-pointer border rounded-xl p-3 flex items-center gap-3 transition-all ${newOpp.sector === sector ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                                <input type="radio" name="sector" value={sector} checked={newOpp.sector === sector} onChange={() => setNewOpp({ ...newOpp, sector: sector as any })} className="text-brand-600 focus:ring-brand-500" />
+                                                <div>
+                                                    <span className="text-sm font-bold text-slate-800 block">{sector}</span>
+                                                    <span className="text-[10px] text-slate-500">{sector === 'Privado' ? 'ISR Normal' : 'Retenciones Estado'}</span>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="col-span-2">
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Nombre Oportunidad</label>
+                                            <input required type="text" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none" placeholder="Ej. Licencia Anual" value={newOpp.name} onChange={e => setNewOpp({ ...newOpp, name: e.target.value })} />
+                                        </div>
+
+                                        {/* Item Type */}
+                                        <div className="col-span-2 flex gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-sm font-bold text-slate-700">Tipo:</span>
+                                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                                <input type="radio" name="itemType" value="Producto" checked={newOpp.itemType !== 'Servicio'} onChange={() => setNewOpp({ ...newOpp, itemType: 'Producto' })} className="text-brand-600" /> Producto
+                                            </label>
+                                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                                <input type="radio" name="itemType" value="Servicio" checked={newOpp.itemType === 'Servicio'} onChange={() => setNewOpp({ ...newOpp, itemType: 'Servicio' })} className="text-brand-600" /> Servicio
+                                            </label>
+                                        </div>
+
+                                        {/* Calculator Inputs */}
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Cantidad</label>
+                                            <input type="number" min="1" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.quantity} onChange={e => handleQuantityChange(Number(e.target.value))} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Costo Unitario (Q)</label>
+                                            <input type="number" min="0" step="0.01" className="w-full border border-slate-200 rounded-xl p-2.5 text-red-600 font-medium bg-white" value={newOpp.unitCost} onChange={e => handleCostChange(Number(e.target.value))} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Margen (%)</label>
+                                            <input type="number" step="0.1" max="99" className="w-full border border-slate-200 rounded-xl p-2.5 text-blue-600 font-bold bg-white" value={newOpp.profitMargin ? Number(newOpp.profitMargin).toFixed(1) : 0} onChange={e => handleMarginChange(Number(e.target.value))} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Precio Unit. Venta (Q)</label>
+                                            <input type="number" min="0" step="0.01" className="w-full border border-slate-200 rounded-xl p-2.5 font-bold bg-white" value={newOpp.unitPrice ? Number(newOpp.unitPrice).toFixed(2) : 0} onChange={e => handlePriceChange(Number(e.target.value))} />
+                                        </div>
+
+                                        <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
+                                            <div className="bg-slate-100 p-4 rounded-xl flex flex-col justify-between items-start border border-slate-200">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Costo Total</span>
+                                                <span className="text-xl font-bold font-lato text-slate-700">Q{Number((newOpp.unitCost || 0) * (newOpp.quantity || 1)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                            <div className="bg-slate-900 text-white p-4 rounded-xl flex flex-col justify-between items-start shadow-lg">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Venta Total (IVA Inc.)</span>
+                                                <span className="text-xl font-bold font-lato">Q{Number(newOpp.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-span-2 bg-green-50 border border-green-100 p-4 rounded-xl">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-sm font-bold text-green-800 flex items-center gap-2"><Calculator size={14} /> Utilidad Neta Estimada</span>
+                                                <span className="text-lg font-bold text-green-700">Q{calculatedProfitInForm.finalProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                            <div className="text-[10px] text-slate-500 space-y-1 border-t border-green-200 pt-2">
+                                                {calculatedProfitInForm.calculationDetails.map((detail, idx) => (
+                                                    <div key={idx} className={`flex justify-between ${detail.color}`}>
+                                                        <span>{detail.label}</span>
+                                                        <span>Q{detail.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                                                    </div>
                                                 ))}
                                             </div>
-                                        </form>
+                                        </div>
 
-                                        <div className="space-y-0 relative pl-4 border-l-2 border-slate-100 ml-2">
-                                            {currentActivities.map((activity) => (
-                                                <div key={activity.id} className="mb-6 relative pl-6 group">
-                                                    <div className={`absolute -left-[25px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${activity.type === 'Llamada' ? 'bg-blue-100 text-blue-600' :
-                                                        activity.type === 'WhatsApp' ? 'bg-green-100 text-green-600' :
-                                                            'bg-slate-100 text-slate-500'
-                                                        }`}>
-                                                        {activity.type === 'Llamada' ? <Phone size={14} /> : <MessageCircle size={14} />}
-                                                    </div>
-                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow">
-                                                        <div className="flex justify-between mb-1">
-                                                            <span className="font-bold text-xs text-slate-800">{activity.type}</span>
-                                                            <span className="text-[10px] text-slate-400">{new Date(activity.date).toLocaleString()}</span>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Probabilidad (%)</label>
+                                            <input type="number" min="0" max="100" className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.probability} onChange={e => setNewOpp({ ...newOpp, probability: Number(e.target.value) })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Origen</label>
+                                            <select className="w-full border border-slate-200 rounded-xl p-2.5 bg-white" value={newOpp.origin} onChange={e => setNewOpp({ ...newOpp, origin: e.target.value })}>
+                                                <option value="Sitio Web">Sitio Web</option>
+                                                <option value="Referido">Referido</option>
+                                                <option value="Llamada Fría">Llamada Fría</option>
+                                                <option value="Referencia de BNI">Referencia de BNI</option>
+                                                <option value="WhatsApp">WhatsApp</option>
+                                                <option value="Evento">Evento</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Fecha Estimada de Cierre</label>
+                                            <input
+                                                type="date"
+                                                className="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-brand-500/20 outline-none"
+                                                value={newOpp.estimatedCloseDate ? newOpp.estimatedCloseDate.split('T')[0] : ''}
+                                                onChange={(e) => setNewOpp({ ...newOpp, estimatedCloseDate: e.target.value ? new Date(e.target.value).toISOString() : new Date().toISOString() })}
+                                            />
+                                        </div>
+
+                                        {/* Observation Field for Date Change */}
+                                        {newOpp.id && (() => {
+                                            const original = opportunities.find(o => o.id === newOpp.id);
+                                            if (original && original.estimatedCloseDate && newOpp.estimatedCloseDate) {
+                                                const formatLame = (iso: string) => iso.split('T')[0];
+                                                const oldDate = formatLame(original.estimatedCloseDate);
+                                                const newDate = formatLame(newOpp.estimatedCloseDate);
+
+                                                // Compare YYYY-MM-DD strings
+                                                if (oldDate !== newDate) {
+                                                    return (
+                                                        <div className="col-span-2 bg-yellow-50 p-4 rounded-xl border border-yellow-200 animate-fade-in">
+                                                            <label className="block text-sm font-bold text-yellow-800 mb-1.5 flex items-center gap-2">
+                                                                <AlertCircle size={16} /> Observación de Cambio de Fecha (Obligatorio)
+                                                            </label>
+                                                            <p className="text-xs text-yellow-600 mb-2">Está cambiando la fecha de cierre estimadad de {original.estimatedCloseDate.split('T')[0]} a {newOpp.estimatedCloseDate!.split('T')[0]}.</p>
+                                                            <textarea
+                                                                required
+                                                                className="w-full border border-yellow-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-yellow-500/20 outline-none"
+                                                                placeholder="Explique la razón del cambio de fecha..."
+                                                                value={newOpp.dateChangeObservation || ''}
+                                                                onChange={e => setNewOpp({ ...newOpp, dateChangeObservation: e.target.value })}
+                                                            />
                                                         </div>
-                                                        <p className="text-sm text-slate-600 leading-relaxed">{activity.description}</p>
-                                                        <p className="text-[10px] text-slate-400 mt-2 font-medium">Por: {activity.responsibleName}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                    );
+                                                }
+                                            }
+                                            return null;
+                                        })()}
+                                        <div className="col-span-2">
+                                            <label className="block text-sm font-bold text-slate-700 mb-1.5">Notas</label>
+                                            <textarea className="w-full border border-slate-200 rounded-xl p-2.5 h-24 bg-white resize-none focus:ring-2 focus:ring-brand-500/20 outline-none" value={newOpp.description} onChange={e => setNewOpp({ ...newOpp, description: e.target.value })} />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Footer Actions */}
-                                <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
-                                    <button
-                                        onClick={() => openEditModal(selectedOpp)}
-                                        className="flex-1 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-sm flex items-center justify-center gap-2"
-                                    >
-                                        <Edit size={16} /> Editar Todo
-                                    </button>
-                                    <button
-                                        onClick={handleQuickUpdate}
-                                        className="flex-1 py-2.5 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2"
-                                    >
-                                        <Save size={16} /> Guardar Cambios
-                                    </button>
+                                <div className="pt-6 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white pb-0">
+                                    <button type="button" onClick={() => setIsNewModalOpen(false)} className="px-6 py-2.5 text-slate-600 hover:bg-slate-50 rounded-xl font-bold transition-colors">Cancelar</button>
+                                    <button type="submit" className="px-8 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 font-bold shadow-lg shadow-brand-500/30 transition-all transform hover:scale-105">Guardar Oportunidad</button>
                                 </div>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Loss Reason Modal */}
+            {
+                pendingStageChange && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fade-in">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-100">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                                <AlertCircle size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2 font-lato">Oportunidad Perdida</h3>
+                            <p className="text-sm text-slate-500 mb-6">Ayúdanos a mejorar registrando el motivo.</p>
+                            <select
+                                className="w-full border border-slate-200 rounded-xl p-3 mb-6 bg-white outline-none focus:ring-2 focus:ring-red-200 text-sm"
+                                value={lossReasonInput}
+                                onChange={(e) => setLossReasonInput(e.target.value)}
+                                autoFocus
+                            >
+                                <option value="">Seleccionar razón...</option>
+                                <option value="Precio muy alto">Precio muy alto</option>
+                                <option value="Competencia">Se fue con la competencia</option>
+                                <option value="Sin presupuesto">Cliente sin presupuesto</option>
+                                <option value="Funcionalidad faltante">Funcionalidad faltante</option>
+                                <option value="Cancelado por cliente">Proyecto cancelado</option>
+                                <option value="Sin respuesta">Cliente dejó de responder</option>
+                            </select>
+                            <div className="flex gap-3">
+                                <button onClick={() => setPendingStageChange(null)} className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">Cancelar</button>
+                                <button onClick={confirmLoss} disabled={!lossReasonInput} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 transition-colors shadow-md shadow-red-500/30">Confirmar</button>
                             </div>
                         </div>
-                    )
-                }
-            </div >
-            );
+                    </div>
+                )
+            }
+
+            {/* Detail Modal (Sidebar) */}
+            {
+                selectedOpp && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-end z-50 transition-all duration-300 backdrop-blur-sm">
+                        <div className="w-full md:w-[600px] h-full bg-white shadow-2xl flex flex-col animate-slide-left">
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+                                <div className="flex-1 mr-4">
+                                    <div className="flex gap-2 mb-3 flex-wrap items-center">
+                                        <div className="relative inline-block">
+                                            <select
+                                                value={selectedOpp.stage}
+                                                onChange={(e) => handleManualStageChange(e.target.value as OpportunityStage)}
+                                                className={`text-xs font-bold px-3 py-1.5 rounded-full uppercase appearance-none pr-8 cursor-pointer outline-none border transition-all ${selectedOpp.stage === OpportunityStage.GANADA ? 'bg-green-100 text-green-700 border-green-200' :
+                                                    selectedOpp.stage === OpportunityStage.PERDIDA ? 'bg-red-100 text-red-700 border-red-200' : 'bg-brand-50 text-brand-700 border-brand-200'
+                                                    }`}
+                                            >
+                                                {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                            <ArrowRightLeft size={12} className="absolute right-2.5 top-2 opacity-50 pointer-events-none" />
+                                        </div>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-slate-800 font-lato leading-tight">{selectedOpp.name}</h2>
+                                    <p className="text-slate-500 font-medium mt-1">{selectedOpp.clientName}</p>
+                                </div>
+                                <button onClick={() => setSelectedOpp(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><X size={20} /></button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                                {/* Quick Stats Row */}
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                        <p className="text-xs font-bold text-slate-400 uppercase">Valor</p>
+                                        <p className="text-lg font-bold text-slate-800">Q{selectedOpp.amount.toLocaleString()}</p>
+                                    </div>
+                                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                        <p className="text-xs font-bold text-slate-400 uppercase">Probabilidad</p>
+                                        <p className="text-lg font-bold text-slate-800">{selectedOpp.probability}%</p>
+                                    </div>
+                                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                        <p className="text-xs font-bold text-slate-400 uppercase">Cierre Est.</p>
+                                        <p className="text-sm font-bold text-slate-800 mt-1">{new Date(selectedOpp.estimatedCloseDate).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+
+                                {/* Purchase Order (If Won) */}
+                                {selectedOpp.stage === OpportunityStage.GANADA && (
+                                    <div className="bg-green-50 border border-green-100 p-5 rounded-xl">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-bold text-green-800 text-sm flex items-center gap-2">
+                                                <FileCheck size={18} /> Orden de Compra
+                                            </h3>
+                                            {selectedOpp.purchaseOrderFile ? (
+                                                <span className="text-[10px] font-bold text-green-700 bg-white px-2 py-1 rounded border border-green-200 shadow-sm">LISTO</span>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded">PENDIENTE</span>
+                                            )}
+                                        </div>
+
+                                        {selectedOpp.purchaseOrderFile ? (
+                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200 shadow-sm">
+                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                    <div className="p-2 bg-green-100 rounded-lg text-green-600"><FileText size={20} /></div>
+                                                    <span className="text-sm text-slate-700 font-medium truncate">{selectedOpp.purchaseOrderFileName || 'OC.pdf'}</span>
+                                                </div>
+                                                <a href={selectedOpp.purchaseOrderFile} download={selectedOpp.purchaseOrderFileName || 'OC.pdf'} className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors"><Eye size={18} /></a>
+                                            </div>
+                                        ) : (
+                                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-green-300 rounded-xl cursor-pointer bg-white hover:bg-green-50/50 transition-colors">
+                                                <Upload className="text-green-400 mb-1" size={24} />
+                                                <span className="text-xs font-bold text-green-600">Subir Orden de Compra</span>
+                                                <input type="file" accept="application/pdf,image/*" className="hidden" onChange={handleFileUpload} />
+                                            </label>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Activity Feed */}
+                                <div>
+                                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                        <Clock className="w-4 h-4 text-brand-500" /> Actividad Reciente
+                                    </h3>
+
+                                    <form onSubmit={handleAddActivity} className="mb-6">
+                                        <div className="relative">
+                                            <textarea
+                                                placeholder="Registrar nota o actividad..."
+                                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 h-24 resize-none bg-slate-50 focus:bg-white transition-all"
+                                                value={newActivity.description}
+                                                onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
+                                            />
+                                            <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="date"
+                                                        required
+                                                        className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
+                                                        value={newActivity.date}
+                                                        onChange={(e) => setNewActivity({ ...newActivity, date: e.target.value })}
+                                                    />
+                                                    <input
+                                                        type="time"
+                                                        required
+                                                        className="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:border-brand-500 text-slate-600"
+                                                        value={newActivity.time}
+                                                        onChange={(e) => setNewActivity({ ...newActivity, time: e.target.value })}
+                                                    />
+                                                </div>
+                                                <button type="submit" className="bg-brand-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-700 transition-colors shadow-sm">Guardar</button>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                                            {['Llamada', 'Correo', 'WhatsApp', 'Reunión', 'Visita Técnica'].map(type => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => setNewActivity({ ...newActivity, type })}
+                                                    className={`px-3 py-1 text-[10px] font-bold rounded-full border transition-colors whitespace-nowrap ${newActivity.type === type
+                                                        ? 'bg-brand-600 text-white border-brand-600'
+                                                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </form>
+
+                                    <div className="space-y-0 relative pl-4 border-l-2 border-slate-100 ml-2">
+                                        {currentActivities.map((activity) => (
+                                            <div key={activity.id} className="mb-6 relative pl-6 group">
+                                                <div className={`absolute -left-[25px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${activity.type === 'Llamada' ? 'bg-blue-100 text-blue-600' :
+                                                    activity.type === 'WhatsApp' ? 'bg-green-100 text-green-600' :
+                                                        'bg-slate-100 text-slate-500'
+                                                    }`}>
+                                                    {activity.type === 'Llamada' ? <Phone size={14} /> : <MessageCircle size={14} />}
+                                                </div>
+                                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow">
+                                                    <div className="flex justify-between mb-1">
+                                                        <span className="font-bold text-xs text-slate-800">{activity.type}</span>
+                                                        <span className="text-[10px] text-slate-400">{new Date(activity.date).toLocaleString()}</span>
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 leading-relaxed">{activity.description}</p>
+                                                    <p className="text-[10px] text-slate-400 mt-2 font-medium">Por: {activity.responsibleName}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
+                                <button
+                                    onClick={() => openEditModal(selectedOpp)}
+                                    className="flex-1 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-sm flex items-center justify-center gap-2"
+                                >
+                                    <Edit size={16} /> Editar Todo
+                                </button>
+                                <button
+                                    onClick={handleQuickUpdate}
+                                    className="flex-1 py-2.5 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/30 flex items-center justify-center gap-2"
+                                >
+                                    <Save size={16} /> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
+    );
 };
