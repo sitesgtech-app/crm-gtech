@@ -15,7 +15,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
     try {
-        const { email, password, name, role, phone } = req.body;
+        const { userId, organizationId } = (req as AuthRequest).user!;
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -31,7 +31,8 @@ export const createUser = async (req: Request, res: Response) => {
                 name,
                 role: role || 'VIEWER',
                 phone: phone || '',
-                company: 'gtech', // Default for internal creation
+                company: 'gtech',
+                organizationId: organizationId || 'org1',
                 active: true
             },
         });
