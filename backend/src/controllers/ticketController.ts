@@ -43,12 +43,15 @@ export const createTicket = async (req: Request, res: Response) => {
         const { organizationId } = (req as AuthRequest).user!;
         const data = ticketSchema.parse(req.body);
 
-        const { clientId, ...otherData } = data;
+        const { clientId, assignedToId, requesterId, department, ...otherData } = data;
 
         const ticket = await prisma.ticket.create({
             data: {
                 ...otherData,
                 clientId: clientId || undefined,
+                assignedToId: assignedToId || undefined, // Fix: Empty string -> undefined
+                requesterId: requesterId || undefined,   // Fix: Empty string -> undefined
+                department: department || 'General',
                 priority: data.priority || 'Media',
                 organizationId: organizationId || 'org1'
             } as any,
