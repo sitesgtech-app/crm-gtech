@@ -40,6 +40,7 @@ const ticketSchema = z.object({
 
 export const createTicket = async (req: Request, res: Response) => {
     try {
+        console.log("Creating Ticket Payload:", JSON.stringify(req.body, null, 2));
         const { organizationId } = (req as AuthRequest).user!;
         const data = ticketSchema.parse(req.body);
 
