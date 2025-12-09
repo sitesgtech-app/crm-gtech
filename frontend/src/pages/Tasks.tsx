@@ -86,7 +86,7 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
                 requesterId: currentTask.requesterId || user.id,
                 priority: currentTask.priority || TaskPriority.MEDIA,
                 department: currentTask.department || 'General',
-                clientId: 'c1' // Temporary hardcoded or handle dynamically if needed
+                // clientId removed as it's optional now
             };
 
             if (currentTask.id) {

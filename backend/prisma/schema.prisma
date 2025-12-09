@@ -53,14 +53,16 @@ model Ticket {
   updatedAt   DateTime       @updatedAt
   organizationId String @default("org1")
 
-  clientId String
-  client   Client @relation(fields: [clientId], references: [id])
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
 
   assignedToId String?
   assignedTo   User?   @relation(fields: [assignedToId], references: [id])
 
   deletedAt      DateTime?
   deletionReason String?
+  
+  requesterId String?
 }
 
 model Deal {
