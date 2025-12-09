@@ -2,15 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { z } from 'zod';
 
-const ticketSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
-    clientId: z.string(),
-    assignedToId: z.string().optional(),
-    department: z.string().optional(),
-    requesterId: z.string().optional(),
-});
+// Schema moved below to include optional fields
 
 export const getTickets = async (req: Request, res: Response) => {
     try {
