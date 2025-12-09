@@ -49,6 +49,7 @@ model Ticket {
   description String
   status      String   @default("Recibida") // Recibida, En Proceso, Finalizada
   priority    String   @default("Media") // Baja, Media, Alta, Urgente
+  department  String   @default("General") // New field
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   organizationId String @default("org1")
