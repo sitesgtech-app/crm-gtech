@@ -168,7 +168,21 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
     const updateStage = async (id: string, stage: OpportunityStage, reason?: string) => {
         try {
-            await api.patch(`/deals/${id}/stage`, { stage });
+            // Frontend (Spanish) -> Backend (English)
+            const mapFrontendStageToBackend = (frontendStage: OpportunityStage) => {
+                switch (frontendStage) {
+                    case OpportunityStage.CONTACTADO: return 'CONTACTED';
+                    case OpportunityStage.SOLICITUD: return 'LEAD';
+                    case OpportunityStage.PROPUESTA: return 'PROPOSAL';
+                    case OpportunityStage.NEGOCIACION: return 'NEGOTIATION';
+                    case OpportunityStage.GANADA: return 'CLOSED_WON';
+                    case OpportunityStage.PERDIDA: return 'CLOSED_LOST';
+                    default: return 'LEAD';
+                }
+            };
+
+            const backendStage = mapFrontendStageToBackend(stage);
+            await api.patch(`/deals/${id}/stage`, { stage: backendStage });
             refreshData();
 
             if (selectedOpp && selectedOpp.id === id) {
