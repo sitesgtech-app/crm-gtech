@@ -188,9 +188,10 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             if (selectedOpp && selectedOpp.id === id) {
                 setSelectedOpp(prev => prev ? { ...prev, stage } : null);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to update stage", err);
-            // alert("Error al actualizar la etapa. Verifique su conexión.");
+            const errorMessage = err.response?.data?.error || "Error desconocido al actualizar etapa";
+            alert(`Error al guardar cambio: ${errorMessage}. La tarjeta volverá a su estado original.`);
         }
     };
 

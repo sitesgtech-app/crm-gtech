@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { db } from '../services/db';
+import api from '../services/api';
 import { Expense, User, Supplier, Project } from '../types';
 import { Plus, Search, X, Receipt, Calendar, DollarSign, FileText, Truck, Briefcase, Upload, Download } from 'lucide-react';
 
@@ -25,35 +25,54 @@ export const Expenses: React.FC<{ user: User }> = ({ user }) => {
     });
 
     useEffect(() => {
-        setExpenses(db.getExpenses());
-        setSuppliers(db.getSuppliers());
-        setProjects(db.getProjects());
+        const fetchData = async () => {
+            try {
+                const [expRes, supRes, projRes] = await Promise.all([
+                    api.get('/expenses'),
+                    api.get('/suppliers'),
+                    api.get('/projects')
+                ]);
+                setExpenses(expRes.data);
+                setSuppliers(supRes.data);
+                setProjects(projRes.data);
+            } catch (error) {
+                console.error("Failed to fetch data", error);
+                // alert("Error al cargar datos. Verifique backend.");
+            }
+        };
+        fetchData();
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newExpense.description || !newExpense.amount) return;
 
-        const expense: Expense = {
-            id: `exp${Date.now()}`,
-            organizationId: user.organizationId || 'org1',
-            date: newExpense.date || new Date().toISOString(),
-            category: newExpense.category || 'Varios',
-            supplier: newExpense.supplier || '',
-            supplierId: newExpense.supplierId,
-            description: newExpense.description,
-            amount: Number(newExpense.amount),
-            registeredBy: user.id,
-            dte: newExpense.dte || '',
-            projectId: newExpense.projectId,
-            fileName: newExpense.fileName,
-            fileUrl: newExpense.fileUrl
-        };
+        try {
+            const expensePayload = {
+                // ...newExpense
+                // Backend schema probably matches
+                // let's verify if 'registeredBy' is auto-handled by context
+                date: newExpense.date || new Date().toISOString(),
+                category: newExpense.category || 'Varios',
+                supplierId: newExpense.supplierId || undefined,
+                supplierName: newExpense.supplier || undefined,
+                description: newExpense.description,
+                amount: Number(newExpense.amount),
+                dte: newExpense.dte,
+                projectId: newExpense.projectId || undefined,
+                fileName: newExpense.fileName,
+                // fileUrl: newExpense.fileUrl // Cannot save big base64 string comfortably in some DBs without blob, leaving out or sending shorter
+            };
 
-        db.addExpense(expense);
-        setExpenses(db.getExpenses());
-        setIsModalOpen(false);
-        setNewExpense({ date: new Date().toISOString().split('T')[0], category: 'Oficina', supplier: '', supplierId: '', description: '', amount: 0, dte: '', projectId: '', fileName: '', fileUrl: '' });
+            await api.post('/expenses', expensePayload);
+            const res = await api.get('/expenses');
+            setExpenses(res.data);
+            setIsModalOpen(false);
+            setNewExpense({ date: new Date().toISOString().split('T')[0], category: 'Oficina', supplier: '', supplierId: '', description: '', amount: 0, dte: '', projectId: '', fileName: '', fileUrl: '' });
+        } catch (error) {
+            console.error("Error saving expense", error);
+            alert("Error al guardar el gasto.");
+        }
     };
 
     const handleSupplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
