@@ -78,6 +78,19 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         return diffDays > 30;
     };
 
+    // Frontend (Spanish) -> Backend (English)
+    const mapFrontendStageToBackend = (frontendStage: OpportunityStage | string) => {
+        switch (frontendStage) {
+            case OpportunityStage.CONTACTADO: return 'CONTACTED';
+            case OpportunityStage.SOLICITUD: return 'LEAD';
+            case OpportunityStage.PROPUESTA: return 'PROPOSAL';
+            case OpportunityStage.NEGOCIACION: return 'NEGOTIATION';
+            case OpportunityStage.GANADA: return 'CLOSED_WON';
+            case OpportunityStage.PERDIDA: return 'CLOSED_LOST';
+            default: return 'LEAD';
+        }
+    };
+
     const onDragEnd = async (result: DropResult) => {
         const { destination, source, draggableId } = result;
 
@@ -168,19 +181,6 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
     const updateStage = async (id: string, stage: OpportunityStage, reason?: string) => {
         try {
-            // Frontend (Spanish) -> Backend (English)
-            const mapFrontendStageToBackend = (frontendStage: OpportunityStage) => {
-                switch (frontendStage) {
-                    case OpportunityStage.CONTACTADO: return 'CONTACTED';
-                    case OpportunityStage.SOLICITUD: return 'LEAD';
-                    case OpportunityStage.PROPUESTA: return 'PROPOSAL';
-                    case OpportunityStage.NEGOCIACION: return 'NEGOTIATION';
-                    case OpportunityStage.GANADA: return 'CLOSED_WON';
-                    case OpportunityStage.PERDIDA: return 'CLOSED_LOST';
-                    default: return 'LEAD';
-                }
-            };
-
             const backendStage = mapFrontendStageToBackend(stage);
             await api.patch(`/deals/${id}/stage`, { stage: backendStage });
             refreshData();
@@ -219,7 +219,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                 const dealPayload = {
                     title: selectedOpp.name,
                     value: Number(selectedOpp.amount),
-                    stage: selectedOpp.stage,
+                    stage: mapFrontendStageToBackend(selectedOpp.stage), // FIX: Map here
                     clientId: selectedOpp.clientId,
                     ownerId: selectedOpp.responsibleId,
                     probability: Number(selectedOpp.probability),
@@ -321,7 +321,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             const dealPayload = {
                 title: newOpp.name || 'Nueva Oportunidad',
                 value: Number(newOpp.amount),
-                stage: mapStageToBackend(OpportunityStage.CONTACTADO), // Default for new is CONTACTED -> CONTACTED
+                stage: mapFrontendStageToBackend(OpportunityStage.CONTACTADO), // Default for new is CONTACTED -> CONTACTED
                 clientId: clientIdToUse,
                 ownerId: newOpp.responsibleId || user.id,
                 probability: Number(newOpp.probability),
@@ -342,7 +342,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                     // For edit, use existing stage but mapped
                     const existingOpp = opportunities.find(o => o.id === newOpp.id);
                     const currentStage = existingOpp ? existingOpp.stage : OpportunityStage.CONTACTADO;
-                    dealPayload.stage = mapStageToBackend(currentStage);
+                    dealPayload.stage = mapFrontendStageToBackend(currentStage); // Use centralized map
                     await api.put(`/deals/${newOpp.id}`, dealPayload);
                 } else {
                     await api.post('/deals', dealPayload);
@@ -422,7 +422,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             const dealPayload = {
                 title: selectedOppForQuote.name,
                 value: quotationData.items.reduce((sum, i) => sum + i.total, 0),
-                stage: OpportunityStage.PROPUESTA,
+                stage: mapFrontendStageToBackend(OpportunityStage.PROPUESTA), // FIX: Map here
                 clientId: selectedOppForQuote.clientId,
                 ownerId: selectedOppForQuote.responsibleId,
                 probability: 70, // Bump probability on proposal
