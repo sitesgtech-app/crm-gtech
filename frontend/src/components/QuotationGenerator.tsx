@@ -311,11 +311,6 @@ export const QuotationGenerator: React.FC<QuotationGeneratorProps> = ({ opportun
                                                 </span>
                                             </div>
                                         )}
-                                        <input
-                                            className="text-[#0e4e82] text-xs font-bold tracking-wide uppercase -mt-2 mr-2 text-right bg-transparent border-none outline-none placeholder-slate-300"
-                                            defaultValue="Soluciones Tecnológicas"
-                                            placeholder="Slogan..."
-                                        />
                                     </div>
                                 )}
                             </div>
