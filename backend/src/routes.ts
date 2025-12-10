@@ -3,6 +3,7 @@ import * as authController from './controllers/authController';
 import * as clientController from './controllers/clientController';
 import * as dealController from './controllers/dealController';
 import * as ticketController from './controllers/ticketController';
+import * as activityController from './controllers/activityController';
 import { authenticateToken } from './middleware/authMiddleware';
 
 export const router = Router();
@@ -27,6 +28,7 @@ router.delete('/users/:id', userController.deleteUser);
 router.get('/clients', clientController.getClients);
 router.post('/clients', clientController.createClient);
 router.get('/clients/:id', clientController.getClient);
+router.put('/clients/:id', clientController.updateClient);
 router.delete('/clients/:id', clientController.deleteClient);
 
 // Deal Routes
@@ -43,3 +45,9 @@ router.get('/tickets/trash', ticketController.getTrashedTickets);
 router.patch('/tickets/:id/status', ticketController.updateTicketStatus);
 router.post('/tickets/:id/restore', ticketController.restoreTicket);
 router.delete('/tickets/:id', ticketController.softDeleteTicket);
+
+// Activity Routes
+router.get('/activities', activityController.getActivities);
+router.post('/activities', activityController.createActivity);
+router.put('/activities/:id', activityController.updateActivity);
+router.delete('/activities/:id', activityController.deleteActivity);

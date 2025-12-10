@@ -51,8 +51,30 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
     const [isExistingClient, setIsExistingClient] = useState(true);
     const [selectedClientId, setSelectedClientId] = useState('');
     const [newClientData, setNewClientData] = useState({
-        name: '', nit: '', phone: '', email: '', company: '', industry: '', companyPhone: '', extension: ''
+        name: '',
+        nit: '',
+        phone: '',
+        email: '',
+        company: '',
+        companyPhone: '',
+        extension: '',
+        address: '',
+        sector: 'Privado',
+        assignedAdvisor: user.id,
+        tags: [] as string[]
     });
+    const [tagInput, setTagInput] = useState('');
+
+    const addTag = () => {
+        if (tagInput.trim() && !newClientData.tags.includes(tagInput.trim())) {
+            setNewClientData({ ...newClientData, tags: [...newClientData.tags, tagInput.trim()] });
+            setTagInput('');
+        }
+    };
+
+    const removeTag = (tag: string) => {
+        setNewClientData({ ...newClientData, tags: newClientData.tags.filter(t => t !== tag) });
+    };
 
     const [newOpp, setNewOpp] = useState<Partial<Opportunity>>({
         name: '',
@@ -287,12 +309,16 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                 }
                 const newClientPayload = {
                     name: newClientData.name,
-                    company: newClientData.company || newClientData.name,
+                    company: newClientData.company,
                     nit: newClientData.nit,
                     phone: newClientData.phone,
                     email: newClientData.email,
-                    address: '',
-                    // organizationId will be handled by backend from token
+                    address: newClientData.address,
+                    companyPhone: newClientData.companyPhone,
+                    extension: newClientData.extension,
+                    sector: newClientData.sector,
+                    assignedAdvisor: newClientData.assignedAdvisor,
+                    tags: newClientData.tags.length > 0 ? newClientData.tags : ['Nuevo'],
                 };
                 const clientRes = await api.post('/clients', newClientPayload);
                 clientIdToUse = clientRes.data.id;
@@ -306,7 +332,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                 clientName = existing.name;
             }
 
-            // Mapping Stages Frontend (Spanish) -> Backend (English ENUM)
+            // Map Stages
             const mapStageToBackend = (frontendStage: string) => {
                 switch (frontendStage) {
                     case OpportunityStage.CONTACTADO: return 'CONTACTED';
@@ -388,7 +414,9 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             itemType: 'Producto',
             status: 'active'
         });
-        setNewClientData({ name: '', nit: '', phone: '', email: '', company: '', industry: '', companyPhone: '', extension: '' });
+        setNewClientData({
+            name: '', nit: '', phone: '', email: '', company: '', companyPhone: '', extension: '', address: '', sector: 'Privado', assignedAdvisor: user.id, tags: []
+        });
         setIsExistingClient(true);
         setSelectedClientId('');
     };
@@ -441,53 +469,77 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         }
     };
 
+    const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+
+    const fetchActivities = async (dealId: string) => {
+        try {
+            const res = await api.get(`/activities?dealId=${dealId}`);
+            setCurrentActivities(res.data);
+        } catch (error) {
+            console.error("Failed to fetch activities", error);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedOpp) {
+            fetchActivities(selectedOpp.id);
+        } else {
+            setCurrentActivities([]);
+        }
+    }, [selectedOpp]);
+
     const handleAddActivity = async (e: React.FormEvent) => {
-        e.preventDefault();
-        // Backend currently doesn't have a separate /activities endpoint linked to deals in the simple controller provided?
-        // Checking task.md or context... `dealSchema` doesn't show activities relation being writable via PUT deal.
-        // `dealController` gets `client` and `owner` but `activities` table might exist?
-        // Let's assume for now we use the local db for activities OR we need to add activity endpoint.
-        // User asked for "connected online". 
-        // `routes.ts` does NOT have /activities endpoint.
-
-        // CRITICAL DECISION: I cannot add backend endpoints in this turn easily without changing backend files which are not open?
-        // Wait, I can see backend files. `routes.ts` was visible.
-        // `routes.ts` DOES NOT have general activities. It has tickets.
-        // The `Calendar.tsx` uses `db.addActivity`.
-        // To make this fully online, I should probably leave activities local for now if I can't guarantee backend support?
-        // NO, User said "sigue sin ser un software conectado".
-        // I should probably warn that Activities are still local, OR quickly mock it?
-        // Actually, let's keep it `db.addActivity` for now but add a comment, because I don't see an Activities controller.
-        // Wait, `Activity` type is used in `Calendar`.
-
-        // I will stick to `db.addActivity` for now to avoid breaking it, but I will put a comment.
-        // Actually, looking at `routes.ts` again... no `activityController`. 
-        // I will focus on DEALS transparency first which is the main Kanban block.
-
         e.preventDefault();
         if (!selectedOpp || !newActivity.description) return;
 
-        // Fallback to local for activities as backend implementation is missing for this specific feature
         const dateTimeString = `${newActivity.date}T${newActivity.time}`;
         const dateObj = new Date(dateTimeString);
 
-        const activity: Activity = {
-            id: `act${Date.now()}`,
-            organizationId: user.organizationId || 'org1',
-            opportunityId: selectedOpp.id,
-            clientId: selectedOpp.clientId,
-            type: newActivity.type as any,
-            date: dateObj.toISOString(),
-            description: newActivity.description,
-            responsibleId: user.id,
-            responsibleName: user.name
-        };
+        try {
+            if (editingActivityId) {
+                // Update existing activity
+                await api.put(`/activities/${editingActivityId}`, {
+                    description: newActivity.description,
+                    type: newActivity.type,
+                    date: dateObj.toISOString()
+                });
+                setEditingActivityId(null);
+            } else {
+                // Create new activity
+                await api.post('/activities', {
+                    dealId: selectedOpp.id,
+                    type: newActivity.type,
+                    description: newActivity.description,
+                    date: dateObj.toISOString()
+                });
+            }
 
-        db.addActivity(activity);
-        setCurrentActivities(db.getActivities(selectedOpp.id));
-        setNewActivity(getInitialActivityState());
-        refreshData();
-        // alert("Nota: Las actividades se guardan localmente por ahora.");
+            fetchActivities(selectedOpp.id);
+            setNewActivity(getInitialActivityState());
+        } catch (error) {
+            console.error("Error saving activity", error);
+            alert("Error al guardar la actividad");
+        }
+    };
+
+    const handleEditActivity = (activity: Activity) => {
+        const dateObj = new Date(activity.date);
+        setNewActivity({
+            type: activity.type,
+            description: activity.description,
+            date: dateObj.toISOString().split('T')[0],
+            time: dateObj.toTimeString().slice(0, 5)
+        });
+        setEditingActivityId(activity.id);
+    };
+
+    const handleDeleteActivity = async (id: string) => {
+        if (window.confirm("¿Eliminar esta actividad?")) {
+            try {
+                await api.delete(`/activities/${id}`);
+                if (selectedOpp) fetchActivities(selectedOpp.id);
+            } catch (e) { alert("Error al eliminar"); }
+        }
     };
 
     const filteredOpps = useMemo(() => {
@@ -881,22 +933,94 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                             </select>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                            <div className="col-span-2 md:col-span-1">
-                                                <label className="block text-xs font-bold text-slate-500 mb-1">Nombre Cliente *</label>
-                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.name} onChange={e => setNewClientData({ ...newClientData, name: e.target.value })} />
+                                        <div className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                            {/* Filters / Metadata Row */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                                    <label className="block text-xs font-bold text-blue-800 mb-1">Asesor Asignado</label>
+                                                    <select
+                                                        className="w-full border border-blue-200 rounded-lg p-1.5 bg-white text-sm outline-none"
+                                                        value={newClientData.assignedAdvisor}
+                                                        onChange={e => setNewClientData({ ...newClientData, assignedAdvisor: e.target.value })}
+                                                    >
+                                                        {users.map(u => (
+                                                            <option key={u.id} value={u.id}>{u.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                                    <label className="block text-xs font-bold text-slate-800 mb-1">Tipo de Sector</label>
+                                                    <select
+                                                        className="w-full border border-slate-300 rounded-lg p-1.5 bg-white text-sm outline-none"
+                                                        value={newClientData.sector}
+                                                        onChange={e => setNewClientData({ ...newClientData, sector: e.target.value })}
+                                                    >
+                                                        <option value="Privado">Sector Privado</option>
+                                                        <option value="Gubernamental">Sector Gubernamental</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div className="col-span-2 md:col-span-1">
-                                                <label className="block text-xs font-bold text-slate-500 mb-1">NIT *</label>
-                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono *</label>
-                                                <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-bold text-slate-500 mb-1">Correo *</label>
-                                                <input required type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
+
+                                            {/* Full Form Fields */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="col-span-2 md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Nombre Completo *</label>
+                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.name} onChange={e => setNewClientData({ ...newClientData, name: e.target.value })} />
+                                                </div>
+                                                <div className="col-span-2 md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">NIT *</label>
+                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Empresa *</label>
+                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.company} onChange={e => setNewClientData({ ...newClientData, company: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono Personal *</label>
+                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Correo *</label>
+                                                    <input required type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono Empresarial</label>
+                                                    <input type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.companyPhone} onChange={e => setNewClientData({ ...newClientData, companyPhone: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Extensión</label>
+                                                    <input type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.extension} onChange={e => setNewClientData({ ...newClientData, extension: e.target.value })} />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Dirección</label>
+                                                    <input type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.address} onChange={e => setNewClientData({ ...newClientData, address: e.target.value })} />
+                                                </div>
+
+                                                {/* Tags */}
+                                                <div className="col-span-2 bg-white p-3 rounded-lg border border-slate-200">
+                                                    <label className="block text-xs font-bold text-slate-700 mb-1">Etiquetas (Segmentación)</label>
+                                                    <div className="flex gap-2 mb-2">
+                                                        <input
+                                                            type="text"
+                                                            className="flex-1 border border-slate-300 rounded px-2 py-1 text-xs bg-white"
+                                                            placeholder="Nueva etiqueta..."
+                                                            value={tagInput}
+                                                            onChange={(e) => setTagInput(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                                                        />
+                                                        <button type="button" onClick={addTag} className="bg-slate-200 text-slate-600 px-3 py-1 rounded text-xs font-bold hover:bg-slate-300">Agregar</button>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(newClientData.tags || []).map((tag, i) => (
+                                                            <span key={i} className="text-[10px] bg-slate-50 border border-slate-200 px-2 py-1 rounded-full flex items-center gap-1">
+                                                                {tag}
+                                                                <button type="button" onClick={() => removeTag(tag)} className="text-slate-400 hover:text-red-500">
+                                                                    <X size={10} />
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -1223,12 +1347,20 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                                     }`}>
                                                     {activity.type === 'Llamada' ? <Phone size={14} /> : <MessageCircle size={14} />}
                                                 </div>
-                                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow">
-                                                    <div className="flex justify-between mb-1">
+                                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow relative">
+                                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => handleEditActivity(activity)} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-brand-600" title="Editar">
+                                                            <Edit size={12} />
+                                                        </button>
+                                                        <button onClick={() => handleDeleteActivity(activity.id)} className="p-1 hover:bg-red-50 rounded text-slate-500 hover:text-red-500" title="Eliminar">
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex justify-between mb-1 pr-6">
                                                         <span className="font-bold text-xs text-slate-800">{activity.type}</span>
                                                         <span className="text-[10px] text-slate-400">{new Date(activity.date).toLocaleString()}</span>
                                                     </div>
-                                                    <p className="text-sm text-slate-600 leading-relaxed">{activity.description}</p>
+                                                    <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{activity.description}</p>
                                                     <p className="text-[10px] text-slate-400 mt-2 font-medium">Por: {activity.responsibleName}</p>
                                                 </div>
                                             </div>
