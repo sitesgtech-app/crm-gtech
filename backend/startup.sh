@@ -7,8 +7,8 @@ echo "Migrando Base de Datos..."
 MAX_RETRIES=5
 COUNT=0
 while [ $COUNT -lt $MAX_RETRIES ]; do
-  # Use timeout 10 to force failure if it hangs, allowing retry
-  timeout 10 npx prisma db push --accept-data-loss && break
+  # Use timeout 30 to force failure if it hangs, allowing retry. Increased for Cold Starts.
+  timeout 30 npx prisma db push --accept-data-loss && break
   COUNT=$((COUNT+1))
   echo "Fallo al conectar (Intento $COUNT/$MAX_RETRIES). Esperando 5s..."
   sleep 5

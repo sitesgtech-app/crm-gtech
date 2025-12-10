@@ -64,7 +64,12 @@ export const createTicket = async (req: Request, res: Response) => {
         res.status(201).json(ticket);
     } catch (error) {
         console.error("Create Ticket Error:", error);
-        res.status(400).json({ error: 'Invalid input or server error' });
+        // Helper to extract Prisma error message if possible
+        const errorMessage = (error as any).message || 'Invalid input or server error';
+        if ((error as any).code) {
+            console.error("Prisma Error Code:", (error as any).code);
+        }
+        res.status(400).json({ error: errorMessage, details: (error as any).meta || {} });
     }
 };
 

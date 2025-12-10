@@ -40,7 +40,8 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
                 setUsers(usersResponse.data);
             } catch (error) {
                 console.error('Error fetching users:', error);
-                setUsers(db.getUsers()); // Fallback
+                // setUsers(db.getUsers()); // Fallback REMOVED to prevent FK errors
+                alert("No se pudieron cargar los usuarios. Por favor recargue la página o contacte soporte.");
             }
 
             // Fetch Tasks based on View Mode
@@ -104,7 +105,8 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
             resetForm();
         } catch (error) {
             console.error("Error saving ticket", error);
-            alert("Error al guardar el ticket");
+            const errorMsg = (error as any).response?.data?.error || (error as any).message || "Error desconocido";
+            alert(`Error al guardar el ticket: ${errorMsg}`);
         }
     };
 

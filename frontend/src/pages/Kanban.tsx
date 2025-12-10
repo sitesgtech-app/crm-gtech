@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Plus, Search, AlertCircle, X, Calendar, MessageCircle, Phone, Mail, MapPin, Clock, Save, UserCircle, Check, Building, ArrowRightLeft, FileText, DollarSign, Calculator, Package, Trash2, Edit, Upload, FileCheck, Eye, TrendingUp, PieChart } from 'lucide-react';
 import { db } from '../services/db';
 import api from '../services/api';
@@ -77,14 +78,32 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
         return diffDays > 30;
     };
 
-    const onDragStart = (e: React.DragEvent, oppId: string) => {
-        e.dataTransfer.setData("oppId", oppId);
-        setIsDragging(true);
+    const onDragEnd = async (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination) return;
+        if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+        const newStage = destination.droppableId as OpportunityStage;
+
+        if (newStage === OpportunityStage.PERDIDA) {
+            setPendingStageChange({ id: draggableId, stage: newStage });
+            return;
+        }
+
+        // Optimistic UI Update
+        const draggedOpp = opportunities.find(o => o.id === draggableId);
+        if (draggedOpp) {
+            const updatedOpp = { ...draggedOpp, stage: newStage };
+            setOpportunities(prev => prev.map(o => o.id === draggableId ? updatedOpp : o));
+
+            // Then call API
+            await updateStage(draggableId, newStage);
+        }
     };
 
-    const onDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-    };
+
+
 
     const refreshData = async () => {
         try {
@@ -626,117 +645,128 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
             </div>
 
             {/* Kanban Board */}
-            <div className="flex-1 overflow-hidden pb-2 font-lato">
-                <div className="flex gap-2 h-full px-2 md:px-0 w-full">
-                    {stages.map((stage) => {
-                        const stageOpps = filteredOpps.filter(o => o.stage === stage);
-                        const stageTotal = stageOpps.reduce((sum, o) => sum + o.amount, 0);
-                        const stageCount = stageOpps.length;
-                        const styles = getStageStyles(stage);
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className="flex-1 overflow-hidden pb-2 font-lato">
+                    <div className="flex gap-2 h-full px-2 md:px-0 w-full">
+                        {stages.map((stage) => {
+                            const stageOpps = filteredOpps.filter(o => o.stage === stage);
+                            const stageTotal = stageOpps.reduce((sum, o) => sum + o.amount, 0);
+                            const stageCount = stageOpps.length;
+                            const styles = getStageStyles(stage);
 
-                        return (
-                            <div
-                                key={stage}
-                                className={`flex-1 min-w-0 flex flex-col rounded-xl max-h-full ${styles.body} border transition-all hover:shadow-md snap-center`}
-                                onDragOver={onDragOver}
-                                onDrop={(e) => onDrop(e, stage)}
-                            >
-                                {/* Header */}
-                                <div className={`h-11 flex items-center justify-between px-3 relative group transition-colors rounded-t-xl border-b ${styles.header} shadow-sm`}>
-                                    <div className="flex items-center gap-2 overflow-hidden">
-                                        <div className={`w-2 h-2 rounded-full ${styles.dot} shadow-sm shrink-0`}></div>
-                                        <h3 className="uppercase text-[11px] font-black tracking-wide truncate font-lato italic text-white/95">
-                                            {stage}
-                                        </h3>
-                                    </div>
-                                    <div className="flex items-baseline gap-1.5 shrink-0">
-                                        <span className="text-[10px] font-bold opacity-90 font-lato">
-                                            Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0, notation: 'compact' })}
-                                        </span>
-                                        <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">{stageCount}</span>
-                                    </div>
-                                </div>
-
-                                {/* Cards Area */}
-                                <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
-                                    {stageOpps.map((opp) => (
+                            return (
+                                <Droppable droppableId={stage} key={stage}>
+                                    {(provided, snapshot) => (
                                         <div
-                                            key={opp.id}
-                                            draggable
-                                            onDragStart={(e) => onDragStart(e, opp.id)}
-                                            onClick={() => setSelectedOpp(opp)}
-                                            className={`bg-white p-3 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-1.5 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4`}
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={`flex-1 min-w-0 flex flex-col rounded-xl max-h-full ${styles.body} border transition-all hover:shadow-md snap-center ${snapshot.isDraggingOver ? 'ring-2 ring-brand-500/50' : ''}`}
                                         >
-                                            {/* Top Row: Dot + Name */}
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-start gap-2 overflow-hidden">
-                                                    <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
-                                                    <div className="min-w-0">
-                                                        <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight font-lato group-hover:text-brand-700 truncate">{opp.name}</h4>
-                                                        <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
-                                                            <Building size={10} />
-                                                            <span className="truncate max-w-[120px]">{opp.clientName}</span>
-                                                        </div>
-                                                    </div>
+                                            {/* Header */}
+                                            <div className={`h-11 flex items-center justify-between px-3 relative group transition-colors rounded-t-xl border-b ${styles.header} shadow-sm`}>
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <div className={`w-2 h-2 rounded-full ${styles.dot} shadow-sm shrink-0`}></div>
+                                                    <h3 className="uppercase text-[11px] font-black tracking-wide truncate font-lato italic text-white/95">
+                                                        {stage}
+                                                    </h3>
                                                 </div>
-
-                                                {/* Sentiment / Probability Icon */}
-                                                {opp.probability >= 80 ? <div className="text-green-500 shrink-0"><TrendingUp size={14} /></div> :
-                                                    opp.probability <= 30 ? <div className="text-amber-400 shrink-0"><AlertCircle size={14} /></div> :
-                                                        <div className="text-slate-300 shrink-0"><PieChart size={14} /></div>
-                                                }
-                                            </div>
-
-                                            {/* Middle Row: Amount & Details */}
-                                            <div className="flex items-center justify-between mt-1 pl-3">
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-xs md:text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
-                                                    <div className="h-3 w-px bg-slate-200"></div>
-                                                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
-                                                        <Calculator size={10} />
-                                                        {opp.probability}%
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Footer: Advisor & Stagnant Warning */}
-                                            <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 pl-1">
-                                                <div className="flex items-center gap-1.5">
-                                                    {getResponsibleAvatar(opp.responsibleId) ? (
-                                                        <img src={getResponsibleAvatar(opp.responsibleId) || ''} alt="Av" className="w-4 h-4 rounded-full" />
-                                                    ) : (
-                                                        <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                                            {users.find(u => u.id === opp.responsibleId)?.name.charAt(0) || '?'}
-                                                        </div>
-                                                    )}
-                                                    <span className="text-[10px] text-slate-400 font-medium truncate max-w-[80px]">
-                                                        {users.find(u => u.id === opp.responsibleId)?.name || 'Sin Asignar'}
+                                                <div className="flex items-baseline gap-1.5 shrink-0">
+                                                    <span className="text-[10px] font-bold opacity-90 font-lato">
+                                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0, notation: 'compact' })}
                                                     </span>
+                                                    <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">{stageCount}</span>
                                                 </div>
+                                            </div>
 
-                                                {isStagnant(opp) && (
-                                                    <div className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                                        <Clock size={10} />
-                                                        <span>Inactivo</span>
+                                            {/* Cards Area */}
+                                            <div className="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar bg-slate-50/50">
+                                                {stageOpps.map((opp, index) => (
+                                                    <Draggable key={opp.id} draggableId={opp.id} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={{ ...provided.draggableProps.style }}
+                                                                onClick={() => setSelectedOpp(opp)}
+                                                                className={`bg-white p-3 rounded-lg shadow-sm hover:shadow-md border border-slate-100 cursor-pointer transition-all duration-200 group relative flex flex-col gap-1.5 hover:-translate-y-0.5 ${getCardBorderColor(opp)} border-l-4 ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-xl z-50' : ''}`}
+                                                            >
+                                                                {/* Top Row: Dot + Name */}
+                                                                <div className="flex items-start justify-between gap-2">
+                                                                    <div className="flex items-start gap-2 overflow-hidden">
+                                                                        <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${opp.probability > 70 ? 'bg-green-500' : opp.probability > 30 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                                                                        <div className="min-w-0">
+                                                                            <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight font-lato group-hover:text-brand-700 truncate">{opp.name}</h4>
+                                                                            <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+                                                                                <Building size={10} />
+                                                                                <span className="truncate max-w-[120px]">{opp.clientName}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Sentiment / Probability Icon */}
+                                                                    {opp.probability >= 80 ? <div className="text-green-500 shrink-0"><TrendingUp size={14} /></div> :
+                                                                        opp.probability <= 30 ? <div className="text-amber-400 shrink-0"><AlertCircle size={14} /></div> :
+                                                                            <div className="text-slate-300 shrink-0"><PieChart size={14} /></div>
+                                                                    }
+                                                                </div>
+
+                                                                {/* Middle Row: Amount & Details */}
+                                                                <div className="flex items-center justify-between mt-1 pl-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <p className="text-xs md:text-sm font-bold text-slate-700">Q{opp.amount.toLocaleString()}</p>
+                                                                        <div className="h-3 w-px bg-slate-200"></div>
+                                                                        <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-slate-100 px-1.5 py-0.5 rounded">
+                                                                            <Calculator size={10} />
+                                                                            {opp.probability}%
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Footer: Advisor & Stagnant Warning */}
+                                                                <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-50 pl-1">
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {getResponsibleAvatar(opp.responsibleId) ? (
+                                                                            <img src={getResponsibleAvatar(opp.responsibleId) || ''} alt="Av" className="w-4 h-4 rounded-full" />
+                                                                        ) : (
+                                                                            <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                                                                                {users.find(u => u.id === opp.responsibleId)?.name.charAt(0) || '?'}
+                                                                            </div>
+                                                                        )}
+                                                                        <span className="text-[10px] text-slate-400 font-medium truncate max-w-[80px]">
+                                                                            {users.find(u => u.id === opp.responsibleId)?.name || 'Sin Asignar'}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {isStagnant(opp) && (
+                                                                        <div className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                                            <Clock size={10} />
+                                                                            <span>Inactivo</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))}
+
+                                                {/* Empty State placeholder */}
+                                                {stageOpps.length === 0 && (
+                                                    <div className="h-32 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-xl m-2">
+                                                        <Package size={24} className="mb-2 opacity-50" />
+                                                        <span className="text-xs font-medium">Sin tratos</span>
                                                     </div>
                                                 )}
+                                                {provided.placeholder}
                                             </div>
                                         </div>
-                                    ))}
-
-                                    {/* Empty State placeholder */}
-                                    {stageOpps.length === 0 && (
-                                        <div className="h-32 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 rounded-xl m-2">
-                                            <Package size={24} className="mb-2 opacity-50" />
-                                            <span className="text-xs font-medium">Sin tratos</span>
-                                        </div>
                                     )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                                </Droppable>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            </DragDropContext>
 
             {/* --- MODALS --- */}
             {/* Quotation Generator */}
