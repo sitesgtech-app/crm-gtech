@@ -113,6 +113,23 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
         return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
     };
 
+    // Preview State
+    const [previewFile, setPreviewFile] = useState<{ url: string; name: string; type: 'pdf' | 'image' } | null>(null);
+
+    const handlePreview = (opp: Opportunity) => {
+        if (!opp.purchaseOrderFile) return;
+
+        // Determine type roughly by extension or regex on base64 header
+        // Base64 header: data:application/pdf;base64,..... or data:image/png;base64,....
+        const isPdf = opp.purchaseOrderFile.includes('application/pdf') || (opp.purchaseOrderFileName || '').toLowerCase().endsWith('.pdf');
+
+        setPreviewFile({
+            url: opp.purchaseOrderFile,
+            name: opp.purchaseOrderFileName || 'Documento',
+            type: isPdf ? 'pdf' : 'image'
+        });
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -188,25 +205,34 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                             {opp.purchaseOrderFileName || 'Documento_Sin_Nombre.pdf'}
                                         </p>
                                         <div className="flex gap-2">
+                                            {/* Preview Button */}
+                                            <button
+                                                onClick={() => handlePreview(opp)}
+                                                className={`flex-1 flex items-center justify-center py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors gap-2 
+                                                    ${opp.purchaseOrderStatus === 'void' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                disabled={opp.purchaseOrderStatus === 'void'}
+                                            >
+                                                <Eye size={14} /> Ver
+                                            </button>
+
                                             <a
                                                 href={opp.purchaseOrderFile}
                                                 download={opp.purchaseOrderFileName || `OC_${opp.clientName}.pdf`}
-                                                className={`flex-1 flex items-center justify-center py-2 text-white rounded-lg text-xs font-bold transition-colors gap-2 ${opp.purchaseOrderStatus === 'void' ? 'bg-slate-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'
+                                                className={`px-3 py-2 text-white rounded-lg text-xs font-bold transition-colors gap-2 flex items-center justify-center ${opp.purchaseOrderStatus === 'void' ? 'bg-slate-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'
                                                     }`}
                                                 style={{ pointerEvents: opp.purchaseOrderStatus === 'void' ? 'none' : 'auto' }}
+                                                title="Descargar"
                                             >
-                                                <Download size={14} /> Descargar
+                                                <Download size={14} />
                                             </a>
 
                                             {opp.purchaseOrderStatus !== 'void' && (
                                                 <>
-                                                    {/* Re-upload button */}
                                                     <label className="cursor-pointer px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg flex items-center justify-center group/upload relative" title="Reemplazar archivo">
                                                         <Upload size={14} className="text-slate-500" />
                                                         <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(e, opp)} />
                                                     </label>
 
-                                                    {/* Void button */}
                                                     <button
                                                         onClick={() => handleVoidOrder(opp)}
                                                         className="px-3 py-2 bg-white border border-red-200 hover:bg-red-50 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"
@@ -217,12 +243,6 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                                 </>
                                             )}
 
-                                            {/* Delete button (Always available for admin or if needed, but 'Void' is safer) */}
-                                            {/* Keeping delete for now as per original code, but maybe Void replaces it? User asked for "Anular". Keeping both for flexibility or removing Delete if Void is preferred? 
-                                                User specifically asked "anular". Often "delete" means gone forever. "Void" means status change. 
-                                                I will keep delete but maybe move it or just keep it. 
-                                                Let's keep Delete as "Trash" icon and Void as "Ban/X" icon. 
-                                            */}
                                             <button
                                                 onClick={() => handleDeleteFile(opp)}
                                                 className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
@@ -256,6 +276,51 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                     <p className="text-slate-400 text-sm max-w-md mx-auto mt-2">
                         Intente ajustar los filtros de fecha o búsqueda.
                     </p>
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {previewFile && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden">
+                        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                <Eye size={18} className="text-brand-600" />
+                                {previewFile.name}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                                <a
+                                    href={previewFile.url}
+                                    download={previewFile.name}
+                                    className="p-2 hover:bg-slate-200 rounded-full text-slate-600 transition-colors"
+                                    title="Descargar"
+                                >
+                                    <Download size={20} />
+                                </a>
+                                <button
+                                    onClick={() => setPreviewFile(null)}
+                                    className="p-2 hover:bg-red-100 hover:text-red-600 rounded-full text-slate-500 transition-colors"
+                                >
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 bg-slate-200 p-1 flex items-center justify-center overflow-auto">
+                            {previewFile.type === 'pdf' ? (
+                                <iframe
+                                    src={previewFile.url}
+                                    className="w-full h-full rounded-lg bg-white"
+                                    title="PDF Preview"
+                                />
+                            ) : (
+                                <img
+                                    src={previewFile.url}
+                                    alt="Preview"
+                                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                                />
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
