@@ -128,12 +128,14 @@ export const updateClient = async (req: Request, res: Response) => {
             return acc;
         }, {} as any);
 
-        // Handle assignedAdvisor specifically
+        // Merge responsibleId into assignedAdvisor if present and assignedAdvisor is missing
         if (cleanData.responsibleId && !cleanData.assignedAdvisor) {
             cleanData.assignedAdvisor = cleanData.responsibleId;
         }
 
-        // Ensure we don't accidentally update responsibleId if it wasn't intended (clean-up)
+        // CRITICAL FIX: responsibleId is a virtual field for compatibility. 
+        // It does NOT exist in the database table, so passing it to generic update() causes a crash.
+        delete cleanData.responsibleId;
 
         const client = await prisma.client.update({
             where: { id, organizationId: organizationId || 'org1' },
