@@ -1,44 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>gtech ERP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              lato: ['Lato', 'sans-serif'],
-            },
-            boxShadow: {
-              'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-              'glow': '0 0 15px rgba(59, 130, 246, 0.5)',
-            },
-            colors: {
-              brand: {
-                50: 'var(--brand-50)',
-                100: 'var(--brand-100)',
-                500: 'var(--brand-500)',
-                600: 'var(--brand-600)',
-                700: 'var(--brand-700)',
-                800: 'var(--brand-800)',
-                900: 'var(--brand-900)',
-              }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>gtech ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lato:wght@400;700;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            lato: ['Lato', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            'glow': '0 0 15px rgba(59, 130, 246, 0.5)',
+          },
+          colors: {
+            brand: {
+              50: 'var(--brand-50)',
+              100: 'var(--brand-100)',
+              500: 'var(--brand-500)',
+              600: 'var(--brand-600)',
+              700: 'var(--brand-700)',
+              800: 'var(--brand-800)',
+              900: 'var(--brand-900)',
             }
           }
         }
       }
-    </script>
-    <link rel="stylesheet" href="/src/index.css">
-  </head>
-  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white" style="--brand-50: #eff6ff; --brand-100: #dbeafe; --brand-500: #3b82f6; --brand-600: #2563eb; --brand-700: #1d4ed8; --brand-800: #1e40af; --brand-900: #0f172a;">
-    <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
-  </body>
+    }
+  </script>
+  <link rel="stylesheet" href="/src/index.css">
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white"
+  style="--brand-50: #eff6ff; --brand-100: #dbeafe; --brand-500: #3b82f6; --brand-600: #2563eb; --brand-700: #1d4ed8; --brand-800: #1e40af; --brand-900: #0f172a;">
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+
 </html>
