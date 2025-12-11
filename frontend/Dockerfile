@@ -5,6 +5,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Force cache invalidation
+ARG CACHEBUST=1
+
+
 COPY . .
 # Ensure VITE_API_URL is empty or relative so it uses the proxy
 ENV VITE_API_URL=/api
