@@ -88,16 +88,16 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
       name: newClient.name || '',
       company: newClient.company || '',
 
-      // Fix for Apple/Safari: explicitly send undefined if empty string
-      email: newClient.email || undefined,
-      phone: newClient.phone || undefined,
+      // Fix for Apple/Safari: explicitly send undefined if empty or JUST whitespace
+      email: newClient.email?.trim() || undefined,
+      phone: newClient.phone?.trim() || undefined,
 
       address: newClient.address || '',
       nit: newClient.nit || '',
 
       // Fix for Apple/Safari
-      companyPhone: newClient.companyPhone || undefined,
-      extension: newClient.extension || undefined,
+      companyPhone: newClient.companyPhone?.trim() || undefined,
+      extension: newClient.extension?.trim() || undefined,
 
       createdAt: newClient.createdAt || new Date().toISOString(),
       tags: newClient.tags || ['Nuevo'],
