@@ -204,7 +204,7 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row justify-between xl:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Cartera de Clientes</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Cartera de Clientes (Actualizado)</h1>
           <p className="text-slate-500 text-sm hidden md:block">Gestión, segmentación y directorio de clientes.</p>
         </div>
 
