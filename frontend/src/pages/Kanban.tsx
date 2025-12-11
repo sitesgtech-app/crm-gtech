@@ -683,7 +683,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                         </div>
                         <div className="text-right">
                             <p className="text-xs font-bold text-brand-200 uppercase tracking-widest">Valor Total (Q)</p>
-                            <p className="text-3xl font-bold font-lato">Q{(pipelineStats.totalAmount / 1000).toFixed(1)}k</p>
+                            <p className="text-3xl font-bold font-lato">Q{pipelineStats.totalAmount.toLocaleString()}</p>
                         </div>
                     </div>
                     {/* Decor */}
@@ -739,7 +739,7 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                                 </div>
                                                 <div className="flex items-baseline gap-1.5 shrink-0">
                                                     <span className="text-[10px] font-bold opacity-90 font-lato">
-                                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0, notation: 'compact' })}
+                                                        Q{stageTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                     </span>
                                                     <span className="text-[9px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">{stageCount}</span>
                                                 </div>

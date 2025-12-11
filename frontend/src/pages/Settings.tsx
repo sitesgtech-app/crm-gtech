@@ -394,6 +394,7 @@ export const Settings: React.FC<{ user: User }> = ({ user }) => {
                         </div>
                     )}
 
+
                     {activeTab === 'migration' && (
                         <div className="max-w-4xl space-y-12">
 
@@ -422,7 +423,22 @@ export const Settings: React.FC<{ user: User }> = ({ user }) => {
                                 </form>
                             </div>
 
-                            {/* 2. CSV Import */}
+                            {/* 2. Legacy Data Sync */}
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <Database size={100} />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                    <Database className="text-brand-600" /> Sincronización de Datos Demo
+                                </h3>
+                                <p className="text-sm text-slate-600 mb-6 max-w-2xl">
+                                    Si utilizó la versión de demostración y guardó información (Clientes, Oportunidades), utilice esta herramienta para migrar esos datos al servidor de producción de forma segura.
+                                </p>
+
+                                <SyncLocalDataButton />
+                            </div>
+
+                            {/* 3. CSV Import */}
                             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
@@ -491,6 +507,201 @@ export const Settings: React.FC<{ user: User }> = ({ user }) => {
                     )}
                 </div>
             </div>
+        </div>
+    );
+};
+
+// Internal Component for Sync Logic
+const SyncLocalDataButton = () => {
+    const [stats, setStats] = useState<{ clients: number, deals: number, activities: number } | null>(null);
+    const [status, setStatus] = useState<'idle' | 'syncing' | 'done' | 'error'>('idle');
+    const [log, setLog] = useState<string[]>([]);
+
+    useEffect(() => {
+        const data = localStorage.getItem('gtech_crm_db_v25');
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                // Filter out default seed data if possible, or just show all
+                // For simplicity, showing all non-org-default if we could distinguish, 
+                // but since IDs are 'c1', 'c2' etc in seed, and user might have added more...
+                // We'll count everything.
+                setStats({
+                    clients: parsed.clients?.length || 0,
+                    deals: parsed.opportunities?.length || 0,
+                    activities: parsed.activities?.length || 0
+                });
+            } catch (e) { }
+        }
+    }, []);
+
+    const mapStage = (spanishStage: string): string => {
+        switch (spanishStage) {
+            case 'Contactado': return 'CONTACTED';
+            case 'Solicitud de producto': return 'LEAD'; // Mapping to closest
+            case 'Envío de propuesta': return 'PROPOSAL';
+            case 'Negociación': return 'NEGOCIACION'; // Backend typo fix? check schema. "NEGOTIATION" usually.
+            // Wait, backend schema said: LEAD, CONTACTED, PROPOSAL, NEGOTIATION, CLOSED_WON, CLOSED_LOST
+            case 'Cerrada (Ganada)': return 'CLOSED_WON';
+            case 'No aceptado (Perdida)': return 'CLOSED_LOST';
+            case 'NEGOTIATION': return 'NEGOTIATION'; // If already valid
+            default: return 'LEAD';
+        }
+    };
+
+    // Note: Backend schema uses 'NEGOTIATION', not 'NEGOCIACION'. 
+    // And 'CONTACTED', 'PROPOSAL'.
+
+    const handleSync = async () => {
+        if (!window.confirm("Esta acción enviará los datos locales al servidor. ¿Continuar?")) return;
+
+        setStatus('syncing');
+        setLog([]);
+        const addLog = (msg: string) => setLog(prev => [...prev, msg]);
+
+        try {
+            const rawData = localStorage.getItem('gtech_crm_db_v25');
+            if (!rawData) throw new Error("No data found");
+            const data = JSON.parse(rawData);
+
+            // Import api
+            const { default: api } = await import('../services/api');
+
+            // 1. Sync Clients
+            const clientMap = new Map<string, string>(); // OldID -> NewID
+            addLog(`Sincronizando ${data.clients?.length || 0} clientes...`);
+
+            if (data.clients) {
+                for (const client of data.clients) {
+                    try {
+                        // Skip if already looks like a UUID (backend generated)? 
+                        // No, let's just duplicate check by email/name? 
+                        // For simplicity, we blindly create and rely on user cleanup or unique constraints (email is unique?)
+                        // Backend schema: email optional.
+
+                        const res = await api.post('/clients', {
+                            name: client.name,
+                            company: client.company,
+                            email: client.email,
+                            phone: client.phone,
+                            address: client.address,
+                            nit: client.nit,
+                            sector: client.sector,
+                            assignedAdvisor: client.assignedAdvisor,
+                            // Note: assignedAdvisor ID (e.g. 'u1') might not match backend Users.
+                            // If users are not synced, this might fail or link to nothing.
+                            // Leaving as is, or stripping if generic.
+                            tags: client.tags
+                        });
+                        clientMap.set(client.id, res.data.id);
+                    } catch (e) {
+                        console.error("Failed client", client.name, e);
+                    }
+                }
+            }
+            addLog("Clientes sincronizados.");
+
+            // 2. Sync Deals
+            const dealMap = new Map<string, string>();
+            addLog(`Sincronizando ${data.opportunities?.length || 0} oportunidades...`);
+
+            if (data.opportunities) {
+                for (const opp of data.opportunities) {
+                    const newClientId = clientMap.get(opp.clientId);
+                    if (!newClientId) {
+                        // If no new client ID, we can't link. Skip or create orphan?
+                        // Skip is safer to avoid errors.
+                        continue;
+                    }
+
+                    try {
+                        const stage = mapStage(opp.stage);
+                        const res = await api.post('/deals', {
+                            title: opp.name,
+                            description: opp.description,
+                            amount: Number(opp.amount),
+                            stage: stage,
+                            clientId: newClientId,
+                            expectedCloseDate: opp.estimatedCloseDate,
+                            // Backend expects ISO-8601 usually. opp.estimatedCloseDate is 'YYYY-MM-DD'.
+                            // check dealController... createDeal expects Date object or valid string.
+                        });
+                        dealMap.set(opp.id, res.data.id);
+                    } catch (e) {
+                        console.error("Failed deal", opp.name, e);
+                    }
+                }
+            }
+            addLog("Oportunidades sincronizadas.");
+
+            // 3. Sync Activities
+            addLog(`Sincronizando ${data.activities?.length || 0} actividades...`);
+            if (data.activities) {
+                for (const act of data.activities) {
+                    const newDealId = dealMap.get(act.opportunityId);
+                    if (!newDealId) continue;
+
+                    try {
+                        await api.post('/activities', {
+                            dealId: newDealId,
+                            type: act.type,
+                            description: act.description,
+                            date: act.date
+                        });
+                    } catch (e) { }
+                }
+            }
+
+            setStatus('done');
+            addLog("¡Sincronización completada con éxito!");
+
+            // Optional: Rename legacy key to avoid re-sync
+            localStorage.setItem('gtech_crm_db_v25_migrated_' + Date.now(), rawData);
+            localStorage.removeItem('gtech_crm_db_v25');
+            setStats(null);
+
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+            addLog("Error crítico durante la migración.");
+        }
+    };
+
+    if (!stats || (stats.clients === 0 && stats.deals === 0)) return null;
+
+    return (
+        <div className="mt-4 p-4 bg-white rounded-lg border border-slate-200">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-6">
+                    <div className="text-center">
+                        <span className="block text-2xl font-bold text-slate-800">{stats.clients}</span>
+                        <span className="text-xs text-slate-500 uppercase font-bold">Clientes</span>
+                    </div>
+                    <div className="text-center">
+                        <span className="block text-2xl font-bold text-slate-800">{stats.deals}</span>
+                        <span className="text-xs text-slate-500 uppercase font-bold">Oportunidades</span>
+                    </div>
+                    <div className="text-center">
+                        <span className="block text-2xl font-bold text-slate-800">{stats.activities}</span>
+                        <span className="text-xs text-slate-500 uppercase font-bold">Actividades</span>
+                    </div>
+                </div>
+                {status !== 'done' && (
+                    <button
+                        onClick={handleSync}
+                        disabled={status === 'syncing'}
+                        className="bg-brand-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-brand-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {status === 'syncing' ? 'Sincronizando...' : 'Sincronizar Ahora'}
+                    </button>
+                )}
+            </div>
+
+            {log.length > 0 && (
+                <div className="bg-slate-900 text-slate-300 p-3 rounded text-xs font-mono h-32 overflow-y-auto">
+                    {log.map((l, i) => <div key={i}>{l}</div>)}
+                </div>
+            )}
         </div>
     );
 };

@@ -118,6 +118,7 @@ export interface Quotation {
   images: string[]; // Base64 strings
   externalFile?: string; // New: Base64 of uploaded replacement file
   externalFileName?: string; // New: Name of uploaded file
+  status?: 'active' | 'void'; // New: Status of the quotation
 }
 
 export interface Opportunity {

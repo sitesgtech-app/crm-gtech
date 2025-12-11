@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../services/db';
 import { User, Opportunity, OpportunityStage, UserRole } from '../types';
-import { Search, FileCheck, Download, Eye, Building, Calendar, DollarSign, Upload, Filter, XCircle } from 'lucide-react';
+import { Search, FileCheck, Download, Eye, Building, Calendar, DollarSign, Upload, Filter, XCircle, Trash2 } from 'lucide-react';
 
 interface PurchaseOrdersProps {
     user: User;
@@ -52,6 +52,18 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                 alert("Archivo cargado exitosamente.");
             };
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleDeleteFile = (opp: Opportunity) => {
+        if (window.confirm('¿Está seguro de eliminar el archivo de Orden de Compra?')) {
+            const updatedOpp: Opportunity = {
+                ...opp,
+                purchaseOrderFile: undefined,
+                purchaseOrderFileName: undefined
+            };
+            db.updateOpportunity(updatedOpp);
+            setOpportunities(prev => prev.map(o => o.id === updatedOpp.id ? updatedOpp : o));
         }
     };
 
@@ -165,10 +177,18 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                                 <Download size={14} /> Descargar
                                             </a>
                                             {/* Re-upload button */}
-                                            <label className="cursor-pointer px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg flex items-center justify-center group/upload relative">
+                                            <label className="cursor-pointer px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg flex items-center justify-center group/upload relative" title="Reemplazar archivo">
                                                 <Upload size={14} className="text-slate-500" />
                                                 <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(e, opp)} />
                                             </label>
+                                            {/* Delete button */}
+                                            <button
+                                                onClick={() => handleDeleteFile(opp)}
+                                                className="px-3 py-2 bg-white border border-red-200 hover:bg-red-50 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"
+                                                title="Eliminar archivo"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
                                         </div>
                                     </>
                                 ) : (
