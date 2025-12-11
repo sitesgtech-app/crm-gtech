@@ -107,9 +107,24 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
     };
 
     if (newClient.id) {
-      // Update not implemented in backend yet for this demo
-      alert("Update not fully implemented in API yet");
+      // Implement update logic
+      // We must strip 'id' from the body if the backend doesn't expect it in the body for update, 
+      // but usually prisma .update ignores it if not trying to change it, or we just pass the rest.
+      // The backend uses req.body parsed by Zod partial. Zod won't complain about extra fields if set to clean? 
+      // Actually my schema in backend doesn't have 'id' in it, so Zod .parse() might strip it or throw if 'strict'.
+      // Looking at controller: const data = clientSchema.partial().parse(req.body); 
+      // default zod is 'strip' unknown keys. So sending ID is fine, it loops be stripped.
+
+      api.put(`/clients/${newClient.id}`, client as any).then(() => {
+        refreshData();
+        setIsModalOpen(false);
+        setNewClient({ name: '', company: '', email: '', phone: '', address: '', nit: '', companyPhone: '', extension: '', sector: 'Privado', tags: [] });
+      }).catch((err: any) => {
+        const msg = err.response?.data?.error || err.message || "Error updating client";
+        alert(`Error: ${msg}`);
+      });
     } else {
+      // Create logic
       // Cast to any to avoid strict type checks if backend type differs slightly
       api.post('/clients', client as any).then(() => {
         refreshData();
