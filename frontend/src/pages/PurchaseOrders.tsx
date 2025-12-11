@@ -60,7 +60,19 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
             const updatedOpp: Opportunity = {
                 ...opp,
                 purchaseOrderFile: undefined,
-                purchaseOrderFileName: undefined
+                purchaseOrderFileName: undefined,
+                purchaseOrderStatus: 'active' // Reset status if deleted
+            };
+            db.updateOpportunity(updatedOpp);
+            setOpportunities(prev => prev.map(o => o.id === updatedOpp.id ? updatedOpp : o));
+        }
+    };
+
+    const handleVoidOrder = (opp: Opportunity) => {
+        if (window.confirm('¿Está seguro de ANULAR esta Orden de Compra?')) {
+            const updatedOpp: Opportunity = {
+                ...opp,
+                purchaseOrderStatus: 'void'
             };
             db.updateOpportunity(updatedOpp);
             setOpportunities(prev => prev.map(o => o.id === updatedOpp.id ? updatedOpp : o));
@@ -164,7 +176,14 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                             <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mt-3">
                                 {opp.purchaseOrderFile ? (
                                     <>
-                                        <p className="text-xs text-slate-400 mb-1">Archivo Adjunto:</p>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <p className="text-xs text-slate-400">Archivo Adjunto:</p>
+                                            {opp.purchaseOrderStatus === 'void' && (
+                                                <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-full border border-red-200">
+                                                    ANULADA
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-xs font-medium text-slate-700 truncate mb-3" title={opp.purchaseOrderFileName}>
                                             {opp.purchaseOrderFileName || 'Documento_Sin_Nombre.pdf'}
                                         </p>
@@ -172,20 +191,42 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                             <a
                                                 href={opp.purchaseOrderFile}
                                                 download={opp.purchaseOrderFileName || `OC_${opp.clientName}.pdf`}
-                                                className="flex-1 flex items-center justify-center py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold transition-colors gap-2"
+                                                className={`flex-1 flex items-center justify-center py-2 text-white rounded-lg text-xs font-bold transition-colors gap-2 ${opp.purchaseOrderStatus === 'void' ? 'bg-slate-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'
+                                                    }`}
+                                                style={{ pointerEvents: opp.purchaseOrderStatus === 'void' ? 'none' : 'auto' }}
                                             >
                                                 <Download size={14} /> Descargar
                                             </a>
-                                            {/* Re-upload button */}
-                                            <label className="cursor-pointer px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg flex items-center justify-center group/upload relative" title="Reemplazar archivo">
-                                                <Upload size={14} className="text-slate-500" />
-                                                <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(e, opp)} />
-                                            </label>
-                                            {/* Delete button */}
+
+                                            {opp.purchaseOrderStatus !== 'void' && (
+                                                <>
+                                                    {/* Re-upload button */}
+                                                    <label className="cursor-pointer px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg flex items-center justify-center group/upload relative" title="Reemplazar archivo">
+                                                        <Upload size={14} className="text-slate-500" />
+                                                        <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => handleFileUpload(e, opp)} />
+                                                    </label>
+
+                                                    {/* Void button */}
+                                                    <button
+                                                        onClick={() => handleVoidOrder(opp)}
+                                                        className="px-3 py-2 bg-white border border-red-200 hover:bg-red-50 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"
+                                                        title="Anular Orden de Compra"
+                                                    >
+                                                        <XCircle size={14} />
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {/* Delete button (Always available for admin or if needed, but 'Void' is safer) */}
+                                            {/* Keeping delete for now as per original code, but maybe Void replaces it? User asked for "Anular". Keeping both for flexibility or removing Delete if Void is preferred? 
+                                                User specifically asked "anular". Often "delete" means gone forever. "Void" means status change. 
+                                                I will keep delete but maybe move it or just keep it. 
+                                                Let's keep Delete as "Trash" icon and Void as "Ban/X" icon. 
+                                            */}
                                             <button
                                                 onClick={() => handleDeleteFile(opp)}
-                                                className="px-3 py-2 bg-white border border-red-200 hover:bg-red-50 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"
-                                                title="Eliminar archivo"
+                                                className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
+                                                title="Eliminar archivo permanentemente"
                                             >
                                                 <Trash2 size={14} />
                                             </button>

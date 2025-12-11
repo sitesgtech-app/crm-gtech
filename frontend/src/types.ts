@@ -61,8 +61,8 @@ export interface Client {
   organizationId: string; // New
   name: string;
   company: string;
-  phone: string;
-  email: string;
+  email?: string; // Changed from string to string? to allow undefined
+  phone?: string; // Changed from string to string? to allow undefined
   address: string;
   createdAt: string;
   tags: string[];
@@ -148,6 +148,8 @@ export interface Opportunity {
   unitPrice?: number;
   unitCost?: number; // New: Cost Price
   itemType?: 'Producto' | 'Servicio';
+
+  purchaseOrderStatus?: 'active' | 'void'; // New: Status of the purchase order verification
 
   // New fields for Purchase Orders
   purchaseOrderFile?: string; // Base64 string of the PDF/Image
