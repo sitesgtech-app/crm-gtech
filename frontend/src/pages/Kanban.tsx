@@ -303,8 +303,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
         try {
             if (!isExistingClient) {
-                if (!newClientData.name || !newClientData.nit || !newClientData.phone || !newClientData.email) {
-                    alert("Por favor complete los campos obligatorios del cliente.");
+                if (!newClientData.name || !newClientData.nit) {
+                    alert("Por favor complete los campos obligatorios del cliente (Nombre y NIT).");
                     return;
                 }
                 const newClientPayload = {
@@ -976,12 +976,12 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                                     <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.company} onChange={e => setNewClientData({ ...newClientData, company: e.target.value })} />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono Personal *</label>
-                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono Personal</label>
+                                                    <input type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.phone} onChange={e => setNewClientData({ ...newClientData, phone: e.target.value })} />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Correo *</label>
-                                                    <input required type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Correo</label>
+                                                    <input type="email" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.email} onChange={e => setNewClientData({ ...newClientData, email: e.target.value })} />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-bold text-slate-500 mb-1">Teléfono Empresarial</label>
