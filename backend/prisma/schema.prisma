@@ -40,6 +40,13 @@ model Client {
   updatedAt DateTime @updatedAt
   organizationId String @default("org1")
 
+  // New fields requested by frontend
+  sector          String?   @default("Privado")
+  assignedAdvisor String?
+  tags            String[]
+  companyPhone    String?
+  extension       String?
+
   tickets Ticket[]
   deals   Deal[]
 }
