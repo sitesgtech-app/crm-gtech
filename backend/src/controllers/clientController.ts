@@ -53,9 +53,17 @@ export const createClient = async (req: Request, res: Response) => {
             }
         });
         res.status(201).json(client);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Create Client Error", error);
-        res.status(400).json({ error: 'Invalid input' });
+
+        let errorMessage = 'Invalid input';
+        if (error instanceof z.ZodError) {
+            errorMessage = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        res.status(400).json({ error: errorMessage });
     }
 };
 

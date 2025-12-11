@@ -123,7 +123,10 @@ export const Clients: React.FC<{ user: User }> = ({ user }) => {
         refreshData();
         setIsModalOpen(false);
         setNewClient({ name: '', company: '', email: '', phone: '', address: '', nit: '', companyPhone: '', extension: '', sector: 'Privado', tags: [] });
-      }).catch(err => alert("Error creating client"));
+      }).catch((err: any) => {
+        const msg = err.response?.data?.error || err.message || "Error creating client";
+        alert(`Error: ${msg}`);
+      });
     }
 
     refreshData();
