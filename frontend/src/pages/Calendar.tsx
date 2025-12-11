@@ -94,7 +94,7 @@ export const Calendar: React.FC<CalendarProps> = ({ user }) => {
             ...newAppt,
             clientId,
             opportunityId: '',
-            notificationEmail: client ? client.email : ''
+            notificationEmail: client?.email || ''
         });
     };
 
@@ -325,10 +325,10 @@ Tel: ${org.phone}
                                             key={act.id}
                                             onClick={(e) => handleActivityClick(e, act)}
                                             className={`text-xs p-1.5 rounded border truncate flex items-center gap-1 cursor-pointer transition-shadow hover:shadow-md ${act.type === 'Visita Técnica' || act.type === 'Visita en Frío'
-                                                    ? 'bg-purple-50 border-purple-100 text-purple-700'
-                                                    : act.type === 'Reunión'
-                                                        ? 'bg-blue-50 border-blue-100 text-brand-700'
-                                                        : 'bg-gray-50 border-gray-100 text-gray-600'
+                                                ? 'bg-purple-50 border-purple-100 text-purple-700'
+                                                : act.type === 'Reunión'
+                                                    ? 'bg-blue-50 border-blue-100 text-brand-700'
+                                                    : 'bg-gray-50 border-gray-100 text-gray-600'
                                                 }`}>
                                             {act.type === 'Visita Técnica' || act.type === 'Visita en Frío' ? <MapPin size={10} /> : <Clock size={10} />}
                                             <span className="font-medium">
@@ -471,8 +471,8 @@ Tel: ${org.phone}
                         <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50 rounded-t-xl">
                             <div>
                                 <span className={`text-xs font-bold px-2 py-1 rounded uppercase ${selectedActivity.type === 'Visita Técnica' || selectedActivity.type === 'Visita en Frío'
-                                        ? 'bg-purple-100 text-purple-700'
-                                        : 'bg-blue-100 text-brand-700'
+                                    ? 'bg-purple-100 text-purple-700'
+                                    : 'bg-blue-100 text-brand-700'
                                     }`}>
                                     {selectedActivity.type}
                                 </span>
