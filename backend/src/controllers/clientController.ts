@@ -11,6 +11,7 @@ const clientSchema = z.object({
     nit: z.string().optional(),
     sector: z.string().optional(),
     assignedAdvisor: z.string().optional(),
+    responsibleId: z.string().optional(), // Mapped to assignedAdvisor for backward compat
     tags: z.array(z.string()).optional(),
     companyPhone: z.string().optional().or(z.literal('')),
     extension: z.string().optional(),
@@ -44,11 +45,19 @@ export const getClients = async (req: Request, res: Response) => {
 
 export const createClient = async (req: Request, res: Response) => {
     try {
-        const { organizationId } = (req as AuthRequest).user!;
+        const { organizationId, userId } = (req as AuthRequest).user!;
         const data = clientSchema.parse(req.body);
+
+        // Ensure assignedAdvisor is present. 
+        // 1. Explicitly provided in payload
+        // 2. Mapped from responsibleId (if sent via legacy frontend code)
+        // 3. Defaults to the creating user (userId)
+        const advisorId = data.assignedAdvisor || (req.body.responsibleId as string) || userId;
+
         const client = await prisma.client.create({
             data: {
                 ...data,
+                assignedAdvisor: advisorId, // Explicitly set it
                 organizationId: organizationId || 'org1'
             }
         });
