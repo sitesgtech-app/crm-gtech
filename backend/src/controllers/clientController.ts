@@ -106,16 +106,20 @@ export const updateClient = async (req: Request, res: Response) => {
         const { id } = req.params;
         const data = clientSchema.partial().parse(req.body);
 
-        // Sanitize data: same as createClient
+        // Sanitize data
         const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+            // Prevent updating restricted fields
+            if (['id', 'createdAt', 'updatedAt', 'organizationId'].includes(key)) {
+                return acc;
+            }
+
             if (typeof value === 'string' && value.trim() === '') {
-                acc[key] = null; // Use null for update to explicitly clear if needed, or undefined. 
-                // Prisma update: undefined means "do not touch", null means "set to null".
-                // Ideally if user sends "", they might mean "clear it". 
-                // But for now let's use undefined (do not touch) if it's just empty "update", 
-                // OR if they intended to clear, we should send null.
-                // Given the "no restrictions" request, let's treat "" as NULL (clear field).
-                acc[key] = null;
+                // Protect required fields from becoming null
+                if (key === 'name') {
+                    acc[key] = data[key]; // Keep original string (even if empty, strictly) or don't set
+                } else {
+                    acc[key] = null;
+                }
             } else if (typeof value === 'string') {
                 acc[key] = value.trim();
             } else {
@@ -125,24 +129,21 @@ export const updateClient = async (req: Request, res: Response) => {
         }, {} as any);
 
         // Handle assignedAdvisor specifically
-        // If the user sends a new assignedAdvisor, use it.
-        // If cleanData.assignedAdvisor is explicitly set (even null), use it.
-        // If it's undefined (not sent), don't touch it.
-        // BUT, we also have responsibleId.
-
-        // Merge responsibleId into assignedAdvisor if present and assignedAdvisor is missing
         if (cleanData.responsibleId && !cleanData.assignedAdvisor) {
             cleanData.assignedAdvisor = cleanData.responsibleId;
         }
+
+        // Ensure we don't accidentally update responsibleId if it wasn't intended (clean-up)
 
         const client = await prisma.client.update({
             where: { id, organizationId: organizationId || 'org1' },
             data: cleanData
         });
         res.json(client);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Update Client Error", error);
-        res.status(500).json({ error: 'Failed to update client' });
+        // Send actual error message to frontend for debugging
+        res.status(500).json({ error: error.message || 'Failed to update client' });
     }
 };
 
