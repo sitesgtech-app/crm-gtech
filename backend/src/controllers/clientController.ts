@@ -4,17 +4,18 @@ import { z } from 'zod';
 
 const clientSchema = z.object({
     name: z.string(),
-    email: z.string().email().optional().or(z.literal('')),
-    phone: z.string().optional().or(z.literal('')),
-    company: z.string().optional(),
-    address: z.string().optional(),
-    nit: z.string().optional(),
-    sector: z.string().optional(),
-    assignedAdvisor: z.string().optional(),
-    responsibleId: z.string().optional(), // Mapped to assignedAdvisor for backward compat
-    tags: z.array(z.string()).optional(),
-    companyPhone: z.string().optional().or(z.literal('')),
-    extension: z.string().optional(),
+    company: z.string().optional().or(z.literal('')), // Making company optional too just in case, though usually required.
+    // Allow null, undefined, empty string, whatever. We clean it later.
+    email: z.any().optional(),
+    phone: z.any().optional(),
+    address: z.any().optional(),
+    nit: z.any().optional(),
+    sector: z.any().optional(),
+    assignedAdvisor: z.any().optional(),
+    responsibleId: z.any().optional(),
+    tags: z.any().optional(),
+    companyPhone: z.any().optional(),
+    extension: z.any().optional(),
 });
 
 interface AuthRequest extends Request {
@@ -48,15 +49,23 @@ export const createClient = async (req: Request, res: Response) => {
         const { organizationId, userId } = (req as AuthRequest).user!;
         const data = clientSchema.parse(req.body);
 
-        // Ensure assignedAdvisor is present. 
-        // 1. Explicitly provided in payload
-        // 2. Mapped from responsibleId (if sent via legacy frontend code)
-        // 3. Defaults to the creating user (userId)
-        const advisorId = data.assignedAdvisor || (req.body.responsibleId as string) || userId;
+        // Sanitize data: Convert empty strings to null/undefined for ALL optional fields
+        const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+            if (typeof value === 'string' && value.trim() === '') {
+                acc[key] = undefined; // Prisma will treat undefined as "do not set" or null if nullable
+            } else if (typeof value === 'string') {
+                acc[key] = value.trim();
+            } else {
+                acc[key] = value;
+            }
+            return acc;
+        }, {} as any);
+
+        const advisorId = cleanData.assignedAdvisor || (req.body.responsibleId as string) || userId;
 
         const client = await prisma.client.create({
             data: {
-                ...data,
+                ...cleanData,
                 assignedAdvisor: advisorId, // Explicitly set it
                 organizationId: organizationId || 'org1'
             }
