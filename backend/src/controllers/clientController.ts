@@ -4,15 +4,15 @@ import { z } from 'zod';
 
 const clientSchema = z.object({
     name: z.string(),
-    email: z.string().email().optional(),
-    phone: z.string().optional(),
+    email: z.string().email().optional().or(z.literal('')),
+    phone: z.string().optional().or(z.literal('')),
     company: z.string().optional(),
     address: z.string().optional(),
     nit: z.string().optional(),
     sector: z.string().optional(),
     assignedAdvisor: z.string().optional(),
     tags: z.array(z.string()).optional(),
-    companyPhone: z.string().optional(),
+    companyPhone: z.string().optional().or(z.literal('')),
     extension: z.string().optional(),
 });
 
