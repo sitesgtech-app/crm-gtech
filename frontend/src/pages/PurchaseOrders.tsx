@@ -307,11 +307,21 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                         </div>
                         <div className="flex-1 bg-slate-200 p-1 flex items-center justify-center overflow-auto">
                             {previewFile.type === 'pdf' ? (
-                                <iframe
-                                    src={previewFile.url}
+                                <object
+                                    data={previewFile.url}
+                                    type="application/pdf"
                                     className="w-full h-full rounded-lg bg-white"
-                                    title="PDF Preview"
-                                />
+                                >
+                                    <embed
+                                        src={previewFile.url}
+                                        type="application/pdf"
+                                        className="w-full h-full rounded-lg bg-white"
+                                    />
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                                        <p>No se pudo visualizar el PDF directamente.</p>
+                                        <a href={previewFile.url} download={previewFile.name} className="text-brand-600 underline mt-2">Descargar en su lugar</a>
+                                    </div>
+                                </object>
                             ) : (
                                 <img
                                     src={previewFile.url}

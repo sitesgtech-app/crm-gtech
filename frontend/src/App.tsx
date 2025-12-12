@@ -169,7 +169,7 @@ function App() {
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
     useEffect(() => {
-        console.log("GTECH CRM Frontend v1.2 - Update Check: " + new Date().toISOString());
+        console.log("GTECH CRM Frontend v1.4 - Preview Fix - Update Check: " + new Date().toISOString());
         const sessionUser = localStorage.getItem('gtech_session');
         if (sessionUser) {
             const parsedUser = JSON.parse(sessionUser);
