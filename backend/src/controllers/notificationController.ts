@@ -4,14 +4,19 @@ import { z } from 'zod';
 
 export const getNotifications = async (req: Request, res: Response) => {
     try {
-        const { userId } = (req as any).user;
+        const user = (req as any).user;
+        console.log("Fetching notifications for user payload:", JSON.stringify(user));
+        const { userId } = user;
+
         const notifications = await prisma.notification.findMany({
             where: { userId },
             orderBy: { createdAt: 'desc' },
-            take: 50 // Limit to last 50
+            take: 50
         });
+        console.log(`Found ${notifications.length} notifications for user ${userId}`);
         res.json(notifications);
     } catch (error) {
+        console.error("Get Notifications Error:", error);
         res.status(500).json({ error: 'Failed to fetch notifications' });
     }
 };

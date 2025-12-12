@@ -62,8 +62,7 @@ export const createTicket = async (req: Request, res: Response) => {
         // NOTIFICATION LOGIC
         if (assignedToId) {
             try {
-                // Ensure notificationController is imported or use prisma directly here to avoid circular deps if any
-                // Using prisma directly for simplicity in controller-to-controller calls
+                console.log(`Attempting to create notification for ${assignedToId}`);
                 await prisma.notification.create({
                     data: {
                         userId: assignedToId,
@@ -73,8 +72,9 @@ export const createTicket = async (req: Request, res: Response) => {
                         type: 'info'
                     }
                 });
+                console.log("Notification created successfully");
             } catch (e) {
-                console.error("Failed to send notification", e);
+                console.error("Failed to send notification in createTicket", e);
             }
         }
 
