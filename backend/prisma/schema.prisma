@@ -91,6 +91,11 @@ model Deal {
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id])
   activities Activity[]
+
+  // Purchase Order Fields
+  purchaseOrderFile      String? // Base64 or URL
+  purchaseOrderFileName  String?
+  purchaseOrderStatus    String? @default("active") // active, void
 }
 
 model Product {

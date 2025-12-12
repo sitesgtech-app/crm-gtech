@@ -18,16 +18,20 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
     const [selectedMonth, setSelectedMonth] = useState<string>(''); // Format: "YYYY-MM"
 
     useEffect(() => {
-        // Get all won opportunities. Admin sees all, sellers see theirs.
-        const allOpps = db.getOpportunities(user.role === UserRole.ADMIN ? undefined : user.id, user.role);
+        const loadOpportunities = async () => {
+            // Fetch from API (Async)
+            const allOpps = await db.fetchOpportunities(user.role === UserRole.ADMIN ? undefined : user.id, user.role);
 
-        // Filter only those that are WON (Include those without files too, so we can upload)
-        const wonOpps = allOpps.filter(o => o.stage === OpportunityStage.GANADA);
+            // Filter only those that are WON (Include those without files too, so we can upload)
+            const wonOpps = allOpps.filter(o => o.stage === OpportunityStage.GANADA);
 
-        // Sort by Last Updated (descending) effectively "Upload Date" or "Close Date"
-        wonOpps.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+            // Sort by Last Updated (descending) effectively "Upload Date" or "Close Date"
+            wonOpps.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
 
-        setOpportunities(wonOpps);
+            setOpportunities(wonOpps);
+        };
+
+        loadOpportunities();
     }, [user]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, opp: Opportunity) => {

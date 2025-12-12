@@ -15,8 +15,12 @@ router.post('/auth/forgot-password', authController.forgotPassword);
 router.post('/auth/reset-password', authController.resetPassword);
 
 // Protected Routes
+import { getOpportunities, updateOpportunity } from './controllers/opportunityController';
 router.use(authenticateToken);
 
+// Opportunities
+router.get('/opportunities', authenticateToken, getOpportunities);
+router.put('/opportunities/:id', authenticateToken, updateOpportunity);
 // User Routes
 import * as userController from './controllers/userController';
 router.get('/users', userController.getUsers);
