@@ -303,8 +303,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
 
         try {
             if (!isExistingClient) {
-                if (!newClientData.name || !newClientData.nit) {
-                    alert("Por favor complete los campos obligatorios del cliente (Nombre y NIT).");
+                if (!newClientData.name) {
+                    alert("Por favor complete los campos obligatorios del cliente (Nombre).");
                     return;
                 }
                 const newClientPayload = {
@@ -968,8 +968,8 @@ export const Kanban: React.FC<KanbanProps> = ({ user }) => {
                                                     <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.name} onChange={e => setNewClientData({ ...newClientData, name: e.target.value })} />
                                                 </div>
                                                 <div className="col-span-2 md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 mb-1">NIT *</label>
-                                                    <input required type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">NIT</label>
+                                                    <input type="text" className="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white" value={newClientData.nit} onChange={e => setNewClientData({ ...newClientData, nit: e.target.value })} />
                                                 </div>
                                                 <div className="col-span-2">
                                                     <label className="block text-xs font-bold text-slate-500 mb-1">Empresa *</label>
