@@ -1,6 +1,14 @@
 import { Request, Response } from 'express';
-import { prisma } from '../lib/prisma';
+import prisma from '../lib/prisma';
 import { z } from 'zod';
+
+interface AuthRequest extends Request {
+    user?: {
+        organizationId: string;
+        role: string;
+        userId: string;
+    };
+}
 
 const opportunitySchema = z.object({
     title: z.string().optional(),
@@ -18,7 +26,7 @@ const opportunitySchema = z.object({
 
 export const getOpportunities = async (req: Request, res: Response) => {
     try {
-        const { organizationId, role, userId } = req.user as any;
+        const { organizationId, role, userId } = (req as AuthRequest).user!;
 
         let where: any = { organizationId };
 
@@ -40,7 +48,7 @@ export const getOpportunities = async (req: Request, res: Response) => {
 
         // Map Prisma Deal to Frontend Opportunity Interface if needed
         // Frontend expects "Opportunity" interface, Prisma has "Deal"
-        const opportunities = deals.map(d => ({
+        const opportunities = deals.map((d: any) => ({
             id: d.id,
             organizationId: d.organizationId,
             clientId: d.clientId,
