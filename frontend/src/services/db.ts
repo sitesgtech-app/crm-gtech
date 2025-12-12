@@ -1,4 +1,5 @@
 
+import api from './api';
 import { Client, Opportunity, OpportunityStage, User, UserRole, Activity, Product, Service, Notification, GuatecomprasEvent, Task, TaskStatus, Purchase, Expense, Subscription, Supplier, InventoryItem, SalesGoal, TaskPriority, Project, ProjectStatus, Employee, Organization, CompanyDocument, IssuedInvoice, PurchasePayment } from '../types';
 
 const STORAGE_KEY = 'gtech_crm_db_v25'; // Increment version for Security Update
@@ -688,17 +689,7 @@ export const db = {
     },
 
     // Fallback sync method for legacy components (returns local storage)
-    getOpportunities: (userId?: string, role?: UserRole): Opportunity[] => {
-        // Warning: This reads from LocalStorage only!
-        const data = db.getData();
-        const orgId = 'org1';
-        const orgData = data.opportunities.filter(o => o.organizationId === orgId);
 
-        if (role === UserRole.ADMIN) return orgData;
-
-        // Users see opportunities they are responsible for
-        return orgData.filter(o => o.responsibleId === userId);
-    },
 
     addOpportunity: async (opp: Opportunity) => {
         // Local Optimistic Update
