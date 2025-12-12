@@ -212,9 +212,7 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                             {/* Preview Button */}
                                             <button
                                                 onClick={() => handlePreview(opp)}
-                                                className={`flex-1 flex items-center justify-center py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors gap-2 
-                                                    ${opp.purchaseOrderStatus === 'void' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                disabled={opp.purchaseOrderStatus === 'void'}
+                                                className="flex-1 flex items-center justify-center py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors gap-2"
                                             >
                                                 <Eye size={14} /> Ver
                                             </button>
@@ -222,9 +220,7 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                                             <a
                                                 href={opp.purchaseOrderFile}
                                                 download={opp.purchaseOrderFileName || `OC_${opp.clientName}.pdf`}
-                                                className={`px-3 py-2 text-white rounded-lg text-xs font-bold transition-colors gap-2 flex items-center justify-center ${opp.purchaseOrderStatus === 'void' ? 'bg-slate-400 cursor-not-allowed' : 'bg-brand-600 hover:bg-brand-700'
-                                                    }`}
-                                                style={{ pointerEvents: opp.purchaseOrderStatus === 'void' ? 'none' : 'auto' }}
+                                                className="px-3 py-2 text-white rounded-lg text-xs font-bold transition-colors gap-2 flex items-center justify-center bg-brand-600 hover:bg-brand-700"
                                                 title="Descargar"
                                             >
                                                 <Download size={14} />
