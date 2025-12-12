@@ -61,6 +61,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onUser
         }
     }, [user]);
 
+    // Apply Brand Colors
+    useEffect(() => {
+        if (org?.brandColors) {
+            document.documentElement.style.setProperty('--sidebar-bg', org.brandColors.sidebar);
+        } else {
+            document.documentElement.style.removeProperty('--sidebar-bg');
+        }
+    }, [org]);
+
     // ...
 
     const handleMarkRead = async (id: string) => {
@@ -333,8 +342,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onUser
                                                         state={child.state}
                                                         onClick={() => { setIsMobileMenuOpen(false); if (isSearching) setMenuSearchTerm(''); }}
                                                         className={`flex items-center px-4 py-2 text-xs font-medium rounded-r-lg transition-all relative ${isChildActive
-                                                                ? `text-white font-bold bg-brand-600 -ml-[2px] border-l-2 border-white`
-                                                                : `${sidebarTextSecondaryClass} hover:${sidebarTextClass} hover:bg-white/5`
+                                                            ? `text-white font-bold bg-brand-600 -ml-[2px] border-l-2 border-white`
+                                                            : `${sidebarTextSecondaryClass} hover:${sidebarTextClass} hover:bg-white/5`
                                                             }`}
                                                     >
                                                         {ChildIcon && <ChildIcon className={`w-3.5 h-3.5 mr-3 ${isChildActive ? 'text-white' : 'opacity-50'}`} />}
@@ -355,8 +364,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onUser
                                 to={item.path!}
                                 onClick={() => { setIsMobileMenuOpen(false); setMenuSearchTerm(''); }}
                                 className={`flex items-center px-3 py-2.5 mb-1 text-sm font-medium rounded-lg transition-all duration-200 ${isActive
-                                        ? sidebarActiveClass
-                                        : `${sidebarTextSecondaryClass} ${sidebarHoverClass}`
+                                    ? sidebarActiveClass
+                                    : `${sidebarTextSecondaryClass} ${sidebarHoverClass}`
                                     }`}
                             >
                                 <Icon className={`w-5 h-5 mr-3 ${isActive ? '' : 'opacity-70'}`} />
