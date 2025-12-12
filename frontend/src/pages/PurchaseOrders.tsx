@@ -42,18 +42,23 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                 return;
             }
             const reader = new FileReader();
-            reader.onloadend = () => {
+            reader.onloadend = async () => {
                 const updatedOpp = {
                     ...opp,
                     purchaseOrderFile: reader.result as string,
                     purchaseOrderFileName: file.name,
                     lastUpdated: new Date().toISOString() // Update timestamp to reflect upload
                 };
-                db.updateOpportunity(updatedOpp);
 
-                // Update local state
-                setOpportunities(prev => prev.map(o => o.id === updatedOpp.id ? updatedOpp : o));
-                alert("Archivo cargado exitosamente.");
+                try {
+                    await db.updateOpportunity(updatedOpp);
+                    // Update local state ONLY if success
+                    setOpportunities(prev => prev.map(o => o.id === updatedOpp.id ? updatedOpp : o));
+                    alert("Archivo cargado exitosamente.");
+                } catch (error) {
+                    console.error("Upload failed", error);
+                    alert("Error al cargar archivo. Verifique que no sea mayor a 50MB y su conexión.");
+                }
             };
             reader.readAsDataURL(file);
         }

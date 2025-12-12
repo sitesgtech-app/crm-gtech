@@ -714,14 +714,9 @@ export const db = {
 
     updateOpportunity: async (opp: Opportunity) => {
         // API Call
-        try {
-            await api.put(`/opportunities/${opp.id}`, opp);
-        } catch (e) {
-            console.error("Failed to update opportunity in backend", e);
-            alert("Error al guardar en el servidor. Verifique su conexión.");
-        }
+        await api.put(`/opportunities/${opp.id}`, opp);
 
-        // Local Update (Keep UI assuming success)
+        // Local Update (Only if API succeeds)
         const data = db.getData();
         const index = data.opportunities.findIndex(o => o.id === opp.id);
         if (index > -1) {
