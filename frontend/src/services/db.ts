@@ -629,6 +629,28 @@ export const db = {
     },
 
     // ... notifications ...
+    fetchNotifications: async (): Promise<Notification[]> => {
+        try {
+            const response = await api.get('/notifications');
+            return response.data;
+        } catch (error) {
+            console.error("Failed to fetch notifications", error);
+            return [];
+        }
+    },
+    markNotificationAsRead: async (id: string) => {
+        try {
+            await api.put(`/notifications/${id}/read`);
+        } catch (e) { console.error(e); }
+
+        // Optimistic local update (legacy support)
+        const data = db.getData();
+        const n = data.notifications.find(n => n.id === id);
+        if (n) {
+            n.read = true;
+            db.saveData(data);
+        }
+    },
     getNotifications: (userId: string): Notification[] => {
         const data = db.getData();
         const orgId = 'org1'; // Enforce Org Isolation

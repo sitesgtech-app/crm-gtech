@@ -21,6 +21,11 @@ router.use(authenticateToken);
 // Opportunities
 router.get('/opportunities', authenticateToken, getOpportunities);
 router.put('/opportunities/:id', authenticateToken, updateOpportunity);
+
+// Notifications
+import * as notificationController from './controllers/notificationController';
+router.get('/notifications', notificationController.getNotifications);
+router.put('/notifications/:id/read', notificationController.markAsRead);
 // User Routes
 import * as userController from './controllers/userController';
 router.get('/users', userController.getUsers);

@@ -59,6 +59,25 @@ export const createTicket = async (req: Request, res: Response) => {
             include: { assignedTo: true }
         });
 
+        // NOTIFICATION LOGIC
+        if (assignedToId) {
+            try {
+                // Ensure notificationController is imported or use prisma directly here to avoid circular deps if any
+                // Using prisma directly for simplicity in controller-to-controller calls
+                await prisma.notification.create({
+                    data: {
+                        userId: assignedToId,
+                        organizationId: organizationId || 'org1',
+                        title: 'Nuevo Ticket Asignado',
+                        message: `Se te ha asignado el ticket: ${data.title}`,
+                        type: 'info'
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to send notification", e);
+            }
+        }
+
 
 
         res.status(201).json(ticket);
