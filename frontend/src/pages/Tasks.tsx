@@ -75,6 +75,35 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
         }
     };
 
+    const handleUpdateTicket = async () => {
+        if (!currentTask || !currentTask.id) return;
+
+        // Validation
+        if (!currentTask.title || !currentTask.description) {
+            alert("Título y Descripción requeridos");
+            return;
+        }
+
+        try {
+            await api.put(`/tickets/${currentTask.id}`, {
+                title: currentTask.title,
+                description: currentTask.description,
+                priority: currentTask.priority,
+                department: currentTask.department,
+                assignedToId: currentTask.assignedTo,
+                requesterId: currentTask.requesterId
+            });
+
+            refreshData();
+            setIsModalOpen(false);
+            resetForm();
+            alert("Ticket actualizado correctamente");
+        } catch (error) {
+            console.error("Failed to update ticket", error);
+            alert("Error al actualizar ticket");
+        }
+    };
+
     const handleSaveTask = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentTask.description || !currentTask.assignedTo || !currentTask.title) return;
@@ -91,18 +120,13 @@ export const Tasks: React.FC<TasksProps> = ({ user }) => {
             };
 
             if (currentTask.id) {
-                // Update Ticket Logic (Might need specific endpoint for full update if ticketController doesn't have it yet)
-                // For now backend only verified updateStatus. 
-                // Assuming we might need to add full update later, but let's try calling patch if available or just log warning
-                alert("La edición completa aun no está implementada en el backend, solo estado.");
-                // await api.put(`/tickets/${currentTask.id}`, taskData);
+                await handleUpdateTicket();
             } else {
                 await api.post('/tickets', taskData);
+                refreshData();
+                setIsModalOpen(false);
+                resetForm();
             }
-
-            refreshData();
-            setIsModalOpen(false);
-            resetForm();
         } catch (error) {
             console.error("Error saving ticket", error);
             const errorMsg = (error as any).response?.data?.error || (error as any).message || "Error desconocido";

@@ -92,6 +92,60 @@ export const createTicket = async (req: Request, res: Response) => {
     }
 };
 
+// Full update
+export const updateTicket = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { organizationId } = (req as AuthRequest).user!;
+        const data = ticketSchema.partial().parse(req.body); // Allow partial updates
+
+        // 1. Get current ticket to check for assignment changes
+        const currentTicket = await prisma.ticket.findUnique({
+            where: { id },
+            select: { assignedToId: true, title: true }
+        });
+
+        if (!currentTicket) return res.status(404).json({ error: 'Ticket not found' });
+
+        // 2. Update Ticket
+        const { clientId, assignedToId, requesterId, ...otherData } = data;
+
+        const updatedTicket = await prisma.ticket.update({
+            where: { id },
+            data: {
+                ...otherData,
+                clientId: clientId === '' ? null : clientId, // Handle cleanup
+                assignedToId: assignedToId === '' ? null : assignedToId,
+                // requesterId not usually updated but safe to include
+                organizationId // Ensure tenant isolation
+            },
+            include: { assignedTo: true }
+        });
+
+        // 3. Notification Logic (If reassigned)
+        if (assignedToId && assignedToId !== currentTicket.assignedToId) {
+            try {
+                await prisma.notification.create({
+                    data: {
+                        userId: assignedToId,
+                        organizationId: organizationId || 'org1',
+                        title: 'Ticket Re-Asignado',
+                        message: `Se te ha asignado el ticket: ${currentTicket.title} (Actualizado)`,
+                        type: 'info'
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to send re-assignment notification", e);
+            }
+        }
+
+        res.json(updatedTicket);
+    } catch (error) {
+        console.error("Update Ticket Error", error);
+        res.status(400).json({ error: 'Failed to update ticket' });
+    }
+};
+
 export const updateTicketStatus = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
