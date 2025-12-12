@@ -277,10 +277,16 @@ export const PurchaseOrders: React.FC<PurchaseOrdersProps> = ({ user }) => {
                     <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-4">
                         <FileCheck size={32} />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-600">No se encontraron documentos</h3>
-                    <p className="text-slate-400 text-sm max-w-md mx-auto mt-2">
-                        Intente ajustar los filtros de fecha o búsqueda.
-                    </p>
+                    <h3 className="text-lg font-bold text-slate-600">No hay órdenes de compra pendientes</h3>
+                    <div className="text-slate-500 text-sm max-w-lg mx-auto mt-4 space-y-2 text-left bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                        <p className="font-bold text-slate-700 mb-2">¿Cómo subir una Orden de Compra?</p>
+                        <ol className="list-decimal list-inside space-y-1">
+                            <li>Ve al módulo de <strong className="text-brand-600">Pipeline & Oportunidades</strong>.</li>
+                            <li>Arrastra una oportunidad a la columna <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold text-xs uppercase">Ganada</span>.</li>
+                            <li>Regresa a esta pantalla.</li>
+                            <li>Verás una tarjeta amarilla con el botón <strong className="text-amber-600">Cargar Archivo</strong>.</li>
+                        </ol>
+                    </div>
                 </div>
             )}
 
